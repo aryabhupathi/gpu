@@ -1,211 +1,4 @@
-// 'use client';
-
-// import { useState } from 'react';
-// import { useRouter } from 'next/navigation';
-// import { useDispatch } from 'react-redux';
-// import { registerUser } from '@/redux/slices/authSlice';
-// import { AppDispatch } from '@/redux/store';
-// import Link from 'next/link';
-// import {
-//   Box,
-//   Button,
-//   Container,
-//   TextField,
-//   Typography,
-//   Paper,
-//   Alert,
-//   Divider,
-// } from '@mui/material';
-
-// export default function SignUp() {
-//   const router = useRouter();
-//   const dispatch = useDispatch<AppDispatch>();
-//   const [name, setName] = useState('');
-//   const [email, setEmail] = useState('');
-//   const [password, setPassword] = useState('');
-//   const [confirmPassword, setConfirmPassword] = useState('');
-//   const [error, setError] = useState('');
-//   const [isLoading, setIsLoading] = useState(false);
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setError('');
-
-//     // Validation
-//     if (password !== confirmPassword) {
-//       setError('Passwords do not match');
-//       return;
-//     }
-
-//     if (password.length < 6) {
-//       setError('Password must be at least 6 characters');
-//       return;
-//     }
-
-//     setIsLoading(true);
-
-//     try {
-//       const resultAction = await dispatch(registerUser({ name, email, password }));
-//       if (registerUser.fulfilled.match(resultAction)) {
-//         router.push('/auth/signin');
-//       } else if (registerUser.rejected.match(resultAction)) {
-//         setError(resultAction.payload as string);
-//       }
-//     } catch (error) {
-//       setError('An unexpected error occurred');
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   return (
-//     <Container maxWidth="sm">
-//       <Box sx={{ my: 8 }}>
-//         <Paper sx={{ p: 4 }}>
-//           <Typography variant="h4" component="h1" align="center" gutterBottom>
-//             Sign Up
-//           </Typography>
-          
-//           {error && (
-//             <Alert severity="error" sx={{ mb: 2 }}>
-//               {error}
-//             </Alert>
-//           )}
-          
-//           <Box component="form" onSubmit={handleSubmit} noValidate>
-//             <TextField
-//               margin="normal"
-//               required
-//               fullWidth
-//               id="name"
-//               label="Full Name"
-//               name="name"
-//               autoComplete="name"
-//               autoFocus
-//               value={name}
-//               onChange={(e) => setName(e.target.value)}
-//             />
-//             <TextField
-//               margin="normal"
-//               required
-//               fullWidth
-//               id="email"
-//               label="Email Address"
-//               name="email"
-//               autoComplete="email"
-//               value={email}
-//               onChange={(e) => setEmail(e.target.value)}
-//             />
-//             <TextField
-//               margin="normal"
-//               required
-//               fullWidth
-//               name="password"
-//               label="Password"
-//               type="password"
-//               id="password"
-//               autoComplete="new-password"
-//               value={password}
-//               onChange={(e) => setPassword(e.target.value)}
-//             />
-//             <TextField
-//               margin="normal"
-//               required
-//               fullWidth
-//               name="confirmPassword"
-//               label="Confirm Password"
-//               type="password"
-//               id="confirmPassword"
-//               value={confirmPassword}
-//               onChange={(e) => setConfirmPassword(e.target.value)}
-//             />
-//             <Button
-//               type="submit"
-//               fullWidth
-//               variant="contained"
-//               sx={{ mt: 3, mb: 2 }}
-//               disabled={isLoading}
-//             >
-//               {isLoading ? 'Signing up...' : 'Sign Up'}
-//             </Button>
-//           </Box>
-          
-//           <Divider sx={{ my: 2 }} />
-          
-//           <Box sx={{ textAlign: 'center' }}>
-//             <Typography variant="body2">
-//               Already have an account?{' '}
-//               <Link href="/auth/signin" style={{ textDecoration: 'none' }}>
-//                 Sign In
-//               </Link>
-//             </Typography>
-//           </Box>
-//         </Paper>
-//       </Box>
-//     </Container>
-//   );
-// }
-
-
-// "use client";
-
-// import { useState } from "react";
-// import { useRouter } from "next/navigation";
-// import {
-//   Container,
-//   Typography,
-//   TextField,
-//   Button,
-//   Box,
-//   Stack
-// } from "@mui/material";
-
-// export default function SignUpPage() {
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-//   const router = useRouter();
-
-//   const handleSignUp = async () => {
-//     const res = await fetch("/api/auth/signup", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ email, password })
-//     });
-
-//     if (res.ok) {
-//       router.push("/auth/signin");
-//     }
-//   };
-
-//   return (
-//     <Container maxWidth="xs">
-//       <Box mt={8}>
-//         <Typography variant="h5" gutterBottom>Sign Up</Typography>
-//         <Stack spacing={2}>
-//           <TextField
-//             label="Email"
-//             type="email"
-//             value={email}
-//             onChange={(e) => setEmail(e.target.value)}
-//             fullWidth
-//           />
-//           <TextField
-//             label="Password"
-//             type="password"
-//             value={password}
-//             onChange={(e) => setPassword(e.target.value)}
-//             fullWidth
-//           />
-//           <Button variant="contained" onClick={handleSignUp}>Sign Up</Button>
-//         </Stack>
-//       </Box>
-//     </Container>
-//   );
-// }
-
-
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -215,64 +8,176 @@ import {
   Button,
   Box,
   Stack,
+  Alert,
+  CircularProgress,
+  Link,
 } from "@mui/material";
-
 export default function SignUpPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    password: "",
+    general: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const router = useRouter();
-
-  const handleSignup = async () => {
-    const res = await fetch("/api/auth/signup", {
-      method: "POST",
-      body: JSON.stringify({ name, email, password }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (res.ok) {
-      router.push("/auth/signin"); // Redirect to login after successful signup
-    } else {
+  // Password validation
+  const validatePassword = (password) => {
+    if (password.length < 8) {
+      return "Password must be at least 8 characters";
+    }
+    if (!/[A-Z]/.test(password)) {
+      return "Password must contain at least one uppercase letter";
+    }
+    if (!/[a-z]/.test(password)) {
+      return "Password must contain at least one lowercase letter";
+    }
+    if (!/[0-9]/.test(password)) {
+      return "Password must contain at least one number";
+    }
+    return "";
+  };
+  // Email validation
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address";
+    }
+    return "";
+  };
+  const validateForm = () => {
+    const newErrors = {
+      name: name.trim() === "" ? "Name is required" : "",
+      email: email.trim() === "" ? "Email is required" : validateEmail(email),
+      password:
+        password === "" ? "Password is required" : validatePassword(password),
+      general: "",
+    };
+    setErrors(newErrors);
+    return !Object.values(newErrors).some((error) => error !== "");
+  };
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
+    setLoading(true);
+    setErrors({ ...errors, general: "" });
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        body: JSON.stringify({ name, email, password }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       const data = await res.json();
-      alert(data.error || "Signup failed");
+      if (res.ok) {
+        setSuccess(true);
+        // Delay redirect to show success message
+        setTimeout(() => {
+          router.push("/auth/signin");
+        }, 1500);
+      } else {
+        setErrors({ ...errors, general: data.error || "Signup failed" });
+      }
+    } catch (error) {
+      setErrors({ ...errors, general: "Network error. Please try again." });
+    } finally {
+      setLoading(false);
     }
   };
-
   return (
     <Container maxWidth="xs">
-      <Box mt={8}>
-        <Typography variant="h5" gutterBottom>
-          Sign Up
+      <Box mt={8} component="form" onSubmit={handleSignup} noValidate>
+        <Typography variant="h5" gutterBottom align="center">
+          Create an Account
         </Typography>
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            Account created successfully! Redirecting to login...
+          </Alert>
+        )}
+        {errors.general && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {errors.general}
+          </Alert>
+        )}
         <Stack spacing={2}>
           <TextField
             label="Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            onBlur={() =>
+              setErrors({
+                ...errors,
+                name: name.trim() === "" ? "Name is required" : "",
+              })
+            }
+            error={!!errors.name}
+            helperText={errors.name}
             fullWidth
+            required
+            disabled={loading}
           />
           <TextField
             label="Email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onBlur={() => {
+              if (email.trim() === "") {
+                setErrors({ ...errors, email: "Email is required" });
+              } else {
+                setErrors({ ...errors, email: validateEmail(email) });
+              }
+            }}
+            error={!!errors.email}
+            helperText={errors.email}
             fullWidth
+            required
+            disabled={loading}
           />
           <TextField
             label="Password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onBlur={() => {
+              if (password === "") {
+                setErrors({ ...errors, password: "Password is required" });
+              } else {
+                setErrors({ ...errors, password: validatePassword(password) });
+              }
+            }}
+            error={!!errors.password}
+            helperText={errors.password}
             fullWidth
+            required
+            disabled={loading}
           />
-          <Button variant="contained" onClick={handleSignup}>
-            Sign Up
+          <Button
+            variant="contained"
+            type="submit"
+            disabled={loading}
+            fullWidth
+          >
+            {loading ? <CircularProgress size={24} /> : "Sign Up"}
           </Button>
+          <Box textAlign="center" mt={1}>
+            <Typography variant="body2">
+              Already have an account?{" "}
+              <Link href="/auth/signin" underline="hover">
+                Sign In
+              </Link>
+            </Typography>
+          </Box>
         </Stack>
       </Box>
     </Container>
   );
 }
-

@@ -190,6 +190,9 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     include: { user: true, comments: true }
   });
 
+  console.log(forum, "ffffff");  // Log forum details to see what’s returned
+
+
   if (!forum) return NextResponse.json({ error: "Not Found" }, { status: 404 });
   return NextResponse.json(forum);
 }
@@ -229,4 +232,49 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
 
   await prisma.forum.delete({ where: { id: params.id } });
   return NextResponse.json({ message: "Forum deleted" });
+}
+
+export async function POST(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { forumId, liked } = await req.json();
+
+  // Find forum by ID
+  const forum = await prisma.forum.findUnique({
+    where: { id: forumId },
+    include: { likes: { where: { userEmail: session.user.email } } }
+  });
+
+  if (!forum) {
+    return NextResponse.json({ error: "Forum not found" }, { status: 404 });
+  }
+
+  // Handle like toggle logic
+  if (liked) {
+    // Add like if not already liked
+    if (!forum.likes.length) {
+      await prisma.forum.update({
+        where: { id: forumId },
+        data: { likes: { connect: { userEmail: session.user.email } } }
+      });
+    }
+  } else {
+    // Remove like if already liked
+    if (forum.likes.length) {
+      await prisma.forum.update({
+        where: { id: forumId },
+        data: { likes: { disconnect: { userEmail: session.user.email } } }
+      });
+    }
+  }
+
+  // Return updated forum with like count
+  const updatedForum = await prisma.forum.findUnique({
+    where: { id: forumId },
+    include: { _count: { select: { likes: true } } }
+  });
+
+  return NextResponse.json(updatedForum);
 }

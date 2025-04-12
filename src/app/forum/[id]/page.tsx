@@ -312,40 +312,494 @@
 //   );
 // }
 
-import { GetServerSideProps } from 'next';
-import { Card, CardContent, Typography } from '@mui/material';
-import prisma from '@/lib/prisma';
+// import { GetServerSideProps } from 'next';
+// import { Card, CardContent, Typography } from '@mui/material';
+// import prisma from '@/lib/prisma';
 
-export default function ForumDetailPage({ forum }: { forum: any }) {
-  if (!forum) {
-    return <Typography variant="h6">Forum not found</Typography>;
-  }
+// export default function ForumDetailPage({ forum }: { forum: any }) {
+//   if (!forum) {
+//     return <Typography variant="h6">Forum not found</Typography>;
+//   }
+
+//   return (
+//     <Card sx={{ mb: 2 }}>
+//       <CardContent>
+//         <Typography variant="h4">{forum.title}</Typography>
+//         <Typography variant="body1" sx={{ mt: 2 }}>
+//           {forum.description}
+//         </Typography>
+//         <Typography variant="caption" sx={{ display: 'block', mt: 2 }}>
+//           Tags: {forum.tags?.join(', ')}
+//         </Typography>
+//       </CardContent>
+//     </Card>
+//   );
+// }
+
+// export const getServerSideProps: GetServerSideProps = async (context) => {
+//   const { forumId } = context.params!;
+//   const forum = await prisma.forum.findUnique({
+//     where: { id: forumId as string },
+//     include: { user: true },
+//   });
+
+//   return {
+//     props: {
+//       forum: forum || null,
+//     },
+//   };
+// };
+
+
+
+// app/forums/[id]/page.tsx (if using App Router)
+// 'use client';
+// import React, { useEffect } from 'react';
+// import { useParams } from 'next/navigation';
+// import { useDispatch, useSelector } from 'react-redux';
+// import { RootState } from '@/redux/store';
+// import { fetchForumById } from '@/redux/slices/forumSlice';
+// import { Typography, Container, Box } from '@mui/material';
+
+// export default function ForumDetailPage() {
+//   const { id } = useParams();
+//   const dispatch = useDispatch();
+//   const { selectedForum, loading, error } = useSelector((state: RootState) => state.forum);
+// console.log(id, "iiiiiiiiiiiiiii")
+//   useEffect(() => {
+//     dispatch(fetchForumById(id as string));
+//   }, [dispatch, id]);
+
+//   if (loading) return <Typography>Loading...</Typography>;
+//   if ( !selectedForum) return <Typography>Error loading forum.</Typography>;
+
+//   return (
+//     <Container>
+//       <Box sx={{ my: 4 }}>
+//         <Typography variant="h4" gutterBottom>{selectedForum.title}</Typography>
+//         <Typography variant="body1" color="text.secondary">{selectedForum.description}</Typography>
+//         <Typography variant="caption" color="text.disabled">
+//           Posted on {new Date(selectedForum.createdAt).toLocaleString()}
+//         </Typography>
+//         {/* Add comments section here */}
+//       </Box>
+//     </Container>
+//   );
+// }
+
+
+// "use client"
+// import { useEffect, useState } from 'react';
+// import { useDispatch, useSelector } from 'react-redux';
+// import { useParams } from 'next/navigation';
+// import { fetchForumById, setForumLikeStatus, createComment }  from '@/redux/slices/forumSlice';
+// import { Container, Box, Typography, CircularProgress, TextField, Button, List, ListItem, IconButton } from '@mui/material';
+// import { ThumbUp, ThumbDown } from '@mui/icons-material';
+
+// export default function ForumDetailPage() {
+//   const { id } = useParams(); // Retrieve the forum id from the URL
+//   const dispatch = useDispatch();
+//   const { selectedForum, loading, error } = useSelector((state) => state.forum);
+//   const [newComment, setNewComment] = useState('');
+//   const [likeStatus, setLikeStatus] = useState<boolean | null>(null); // Track like status
+
+//   useEffect(() => {
+//     if (id) {
+//       dispatch(fetchForumById(id as string));
+//     }
+//   }, [dispatch, id]);
+
+//   useEffect(() => {
+//     if (selectedForum) {
+//       setLikeStatus(selectedForum.userLiked ?? null); // Set likeStatus based on selectedForum data
+//     }
+//   }, [selectedForum]);
+
+//   const handleCommentSubmit = (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (newComment.trim()) {
+//       // Dispatch action to create a new comment
+//       dispatch(createComment({ forumId: id as string, content: newComment }));
+//       setNewComment('');
+//     }
+//   };
+
+//   const handleLikeToggle = () => {
+//     if (likeStatus === null) return; // Prevent action if likeStatus is undefined
+//     dispatch(setForumLikeStatus({ forumId: id as string, liked: !likeStatus }));
+//     setLikeStatus(!likeStatus);
+//   };
+
+//   if (loading) return <CircularProgress />;
+//   if (error || !selectedForum) return <Typography>Error loading forum</Typography>;
+
+//   return (
+//     <Container>
+//       <Box sx={{ my: 4 }}>
+//         <Typography variant="h4" gutterBottom>
+//           {selectedForum.title}
+//         </Typography>
+//         <Typography variant="body1" color="text.secondary">
+//           {selectedForum.description}
+//         </Typography>
+//         <Typography variant="caption" color="text.disabled">
+//           Posted on {new Date(selectedForum.createdAt).toLocaleString()}
+//         </Typography>
+
+//         {/* Likes Section */}
+//         <Box sx={{ mt: 2 }}>
+//           <IconButton
+//             color={likeStatus ? 'primary' : 'default'}
+//             onClick={handleLikeToggle}
+//             aria-label="like"
+//           >
+//             <ThumbUp />
+//           </IconButton>
+//           <Typography variant="body2" sx={{ display: 'inline', ml: 1 }}>
+//             {selectedForum._count?.likes} Likes
+//           </Typography>
+//         </Box>
+
+//         {/* Comments Section */}
+//         <Box sx={{ mt: 4 }}>
+//           <Typography variant="h6" gutterBottom>
+//             Comments
+//           </Typography>
+//           <form onSubmit={handleCommentSubmit}>
+//             <TextField
+//               label="Add a comment"
+//               fullWidth
+//               value={newComment}
+//               onChange={(e) => setNewComment(e.target.value)}
+//               required
+//               multiline
+//               rows={3}
+//               sx={{ mb: 2 }}
+//             />
+//             <Button type="submit" variant="contained" color="primary" sx={{ mb: 2 }}>
+//               Post Comment
+//             </Button>
+//           </form>
+
+//           {/* Display comments */}
+//           <List>
+//             {selectedForum.comments && selectedForum.comments.map((comment) => (
+//               <ListItem key={comment.id}>
+//                 <Typography variant="body2" color="text.secondary">
+//                   {comment.content} - <b>{comment.user?.email}</b>
+//                 </Typography>
+//               </ListItem>
+//             ))}
+//           </List>
+//         </Box>
+//       </Box>
+//     </Container>
+//   );
+// }
+
+// "use client"
+// import { useEffect, useState } from 'react';
+// import { useDispatch, useSelector } from 'react-redux';
+// import { useParams } from 'next/navigation';
+// import { fetchForumById, createComment, setForumLikeStatus } from '@/redux/slices/forumSlice';
+// import { Container, Box, Typography, CircularProgress, TextField, Button, List, ListItem, IconButton } from '@mui/material';
+// import { ThumbUp } from '@mui/icons-material';
+
+// export default function ForumDetailPage() {
+//   const { id } = useParams(); // Retrieve the forum id from the URL
+//   const dispatch = useDispatch();
+//   const { selectedForum, loading, error } = useSelector((state) => state.forum);
+//   const [newComment, setNewComment] = useState('');
+//   const [likeStatus, setLikeStatus] = useState<boolean | null>(null); // Track like status
+
+//   useEffect(() => {
+//     if (id) {
+//       dispatch(fetchForumById(id as string));
+//     }
+//   }, [dispatch, id]);
+
+//   useEffect(() => {
+//     if (selectedForum) {
+//       setLikeStatus(selectedForum.userLiked ?? null); // Set likeStatus based on selectedForum data
+//     }
+//   }, [selectedForum]);
+
+//   const handleCommentSubmit = (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (newComment.trim()) {
+//       // Dispatch action to create a new comment
+//       dispatch(createComment({ forumId: id as string, content: newComment }));
+//       setNewComment('');  // Clear the comment field
+//     }
+//   };
+
+//   const handleLikeToggle = () => {
+//     if (likeStatus === null) return; // Prevent action if likeStatus is undefined
+//     dispatch(setForumLikeStatus({ forumId: id as string, liked: !likeStatus }));
+//     setLikeStatus(!likeStatus);
+//   };
+
+//   if (loading) return <CircularProgress />;
+//   if (error || !selectedForum) return <Typography>Error loading forum</Typography>;
+
+//   return (
+//     <Container>
+//       <Box sx={{ my: 4 }}>
+//         <Typography variant="h4" gutterBottom>
+//           {selectedForum.title}
+//         </Typography>
+//         <Typography variant="body1" color="text.secondary">
+//           {selectedForum.description}
+//         </Typography>
+//         <Typography variant="caption" color="text.disabled">
+//           Posted on {new Date(selectedForum.createdAt).toLocaleString()}
+//         </Typography>
+
+//         {/* Likes Section */}
+//         <Box sx={{ mt: 2 }}>
+//           <IconButton
+//             color={likeStatus ? 'primary' : 'default'}
+//             onClick={handleLikeToggle}
+//             aria-label="like"
+//           >
+//             <ThumbUp />
+//           </IconButton>
+//           <Typography variant="body2" sx={{ display: 'inline', ml: 1 }}>
+//             {selectedForum._count?.likes} Likes
+//           </Typography>
+//         </Box>
+
+//         {/* Comments Section */}
+//         <Box sx={{ mt: 4 }}>
+//           <Typography variant="h6" gutterBottom>
+//             Comments
+//           </Typography>
+//           <form onSubmit={handleCommentSubmit}>
+//             <TextField
+//               label="Add a comment"
+//               fullWidth
+//               value={newComment}
+//               onChange={(e) => setNewComment(e.target.value)}
+//               required
+//               multiline
+//               rows={3}
+//               sx={{ mb: 2 }}
+//             />
+//             <Button type="submit" variant="contained" color="primary" sx={{ mb: 2 }}>
+//               Post Comment
+//             </Button>
+//           </form>
+
+//           {/* Display comments */}
+//           <List>
+//             {selectedForum.comments && selectedForum.comments.map((comment) => (
+//               <ListItem key={comment.id}>
+//                 <Typography variant="body2" color="text.secondary">
+//                   {comment.content} - <b>{comment.user?.email}</b>
+//                 </Typography>
+//               </ListItem>
+//             ))}
+//           </List>
+//         </Box>
+//       </Box>
+//     </Container>
+//   );
+// }
+
+
+
+"use client"
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { CircularProgress, Typography, Container, Box, IconButton, TextField, Button, List, ListItem } from '@mui/material';
+import { ThumbUp } from '@mui/icons-material';
+import { fetchForumById, setForumLikeStatus, toggleForumLike } from '@/redux/slices/forumSlice'
+import { fetchCommentsByForumId } from '@/redux/slices/commentSlice';
+import { addComment } from '@/redux/slices/commentSlice';
+
+export default function ForumDetailPage() {
+  const { id } = useParams();
+  const dispatch = useDispatch();
+
+  const { selectedForum, loading: forumLoading, error: forumError } = useSelector(
+    (state) => state.forum
+  );
+  const { user } = useSelector((state: RootState) => state.auth);
+
+  const { comments, loading: commentsLoading, error: commentsError } = useSelector((state) => state.comment);
+
+  const [newComment, setNewComment] = useState('');
+  const [likeStatus, setLikeStatus] = useState<boolean | null>(null);
+
+  // Fetch forum and its comments
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchForumById(id as string));
+      dispatch(fetchCommentsByForumId(id as string));
+    }
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    if (selectedForum) {
+      setLikeStatus(selectedForum.userLiked ?? null);
+    }
+  }, [selectedForum]);
+
+  const handleCommentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newComment.trim()) {
+      dispatch(addComment({ forumId: id as string, content: newComment }));
+      setNewComment('');
+    }
+  };
+
+  const handleLikeToggle = async () => {
+
+    console.log("clcik")
+    if (likeStatus === null) return;
+
+    try {
+      const res = await toggleForumLike(id as string, !likeStatus);
+      dispatch(setForumLikeStatus({ forumId: id as string, liked: !likeStatus, newLikeCount: res.likes }));
+      setLikeStatus(!likeStatus);
+    } catch (error) {
+      console.error('Failed to toggle like:', error);
+    }
+  };
+
+  if (forumLoading) return <CircularProgress />;
+  if (forumError || !selectedForum)
+    return <Typography>Error loading forum</Typography>;
 
   return (
-    <Card sx={{ mb: 2 }}>
-      <CardContent>
-        <Typography variant="h4">{forum.title}</Typography>
-        <Typography variant="body1" sx={{ mt: 2 }}>
-          {forum.description}
+    <Container>
+      <Box sx={{ my: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          {selectedForum.title}
         </Typography>
-        <Typography variant="caption" sx={{ display: 'block', mt: 2 }}>
-          Tags: {forum.tags?.join(', ')}
+        <Typography variant="body1" color="text.secondary">
+          {selectedForum.description}
         </Typography>
-      </CardContent>
-    </Card>
+        <Typography variant="caption" color="text.disabled">
+          Posted on {new Date(selectedForum.createdAt).toLocaleString()}
+        </Typography>
+
+        {/* Likes */}
+        {user ? (
+  <Box sx={{ mt: 2 }}>
+    <IconButton
+      color={likeStatus ? 'primary' : 'default'}
+      onClick={handleLikeToggle}
+      aria-label="like"
+    >
+      <ThumbUp />
+    </IconButton>
+    <Typography variant="body2" sx={{ display: 'inline', ml: 1 }}>
+      {selectedForum._count?.likes ?? 0} Likes
+    </Typography>
+  </Box>
+) : (
+  <Typography variant="body2" sx={{ mt: 2 }} color="text.secondary">
+    Log in to like this post.
+  </Typography>
+)}
+        {/* Comments */}
+        {/* <Box sx={{ mt: 4 }}>
+          <Typography variant="h6" gutterBottom>
+            Comments
+          </Typography>
+
+          <form onSubmit={handleCommentSubmit}>
+            <TextField
+              label="Add a comment"
+              fullWidth
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              required
+              multiline
+              rows={3}
+              sx={{ mb: 2 }}
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={commentsLoading}
+              sx={{ mb: 2 }}
+            >
+              Post Comment
+            </Button>
+          </form>
+
+          {commentsLoading && <CircularProgress />}
+          {commentsError && <Typography color="error">{commentsError}</Typography>}
+
+          <List>
+            {comments.map((comment) => (
+              <ListItem key={comment.id}>
+                <Box>
+                  <Typography variant="body2">{comment.content}</Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                    — {comment.user?.email || 'Anonymous'}
+                  </Typography>
+                </Box>
+              </ListItem>
+            ))}
+          </List>
+        </Box> */}
+        {/* Comments */}
+<Box sx={{ mt: 4 }}>
+  <Typography variant="h6" gutterBottom>
+    Comments
+  </Typography>
+
+  {user ? (
+    <form onSubmit={handleCommentSubmit}>
+      <TextField
+        label="Add a comment"
+        fullWidth
+        value={newComment}
+        onChange={(e) => setNewComment(e.target.value)}
+        required
+        multiline
+        rows={3}
+        sx={{ mb: 2 }}
+      />
+      <Button
+        type="submit"
+        variant="contained"
+        color="primary"
+        disabled={commentsLoading}
+        sx={{ mb: 2 }}
+      >
+        Post Comment
+      </Button>
+    </form>
+  ) : (
+    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+      Log in to post a comment.
+    </Typography>
+  )}
+
+  {commentsLoading && <CircularProgress />}
+  {commentsError && <Typography color="error">{commentsError}</Typography>}
+
+  <List>
+    {comments.map((comment) => (
+      <ListItem key={comment.id}>
+        <Box>
+          <Typography variant="body2">{comment.content}</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+            — {comment.user?.email || 'Anonymous'}
+          </Typography>
+        </Box>
+      </ListItem>
+    ))}
+  </List>
+</Box>
+
+      </Box>
+    </Container>
   );
 }
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { forumId } = context.params!;
-  const forum = await prisma.forum.findUnique({
-    where: { id: forumId as string },
-    include: { user: true },
-  });
-
-  return {
-    props: {
-      forum: forum || null,
-    },
-  };
-};

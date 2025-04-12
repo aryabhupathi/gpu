@@ -1,179 +1,4 @@
-// 'use client';
-
-// import { useState } from 'react';
-// import { useRouter, useSearchParams } from 'next/navigation';
-// import { signIn } from 'next-auth/react';
-// import Link from 'next/link';
-// import {
-//   Box,
-//   Button,
-//   Container,
-//   TextField,
-//   Typography,
-//   Paper,
-//   Alert,
-//   Divider,
-// } from '@mui/material';
-
-// export default function SignIn() {
-//   const router = useRouter();
-//   const searchParams = useSearchParams();
-//   const callbackUrl = searchParams.get('callbackUrl') || '/';
-//   const [email, setEmail] = useState('');
-//   const [password, setPassword] = useState('');
-//   const [error, setError] = useState('');
-//   const [isLoading, setIsLoading] = useState(false);
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setIsLoading(true);
-//     setError('');
-
-//     try {
-//       const result = await signIn('credentials', {
-//         redirect: false,
-//         email,
-//         password,
-//       });
-
-//       if (result?.error) {
-//         setError(result.error);
-//       } else {
-//         router.push(callbackUrl);
-//       }
-//     } catch (error) {
-//       setError('An unexpected error occurred');
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   return (
-//     <Container maxWidth="sm">
-//       <Box sx={{ my: 8 }}>
-//         <Paper sx={{ p: 4 }}>
-//           <Typography variant="h4" component="h1" align="center" gutterBottom>
-//             Sign In
-//           </Typography>
-          
-//           {error && (
-//             <Alert severity="error" sx={{ mb: 2 }}>
-//               {error}
-//             </Alert>
-//           )}
-          
-//           <Box component="form" onSubmit={handleSubmit} noValidate>
-//             <TextField
-//               margin="normal"
-//               required
-//               fullWidth
-//               id="email"
-//               label="Email Address"
-//               name="email"
-//               autoComplete="email"
-//               autoFocus
-//               value={email}
-//               onChange={(e) => setEmail(e.target.value)}
-//             />
-//             <TextField
-//               margin="normal"
-//               required
-//               fullWidth
-//               name="password"
-//               label="Password"
-//               type="password"
-//               id="password"
-//               autoComplete="current-password"
-//               value={password}
-//               onChange={(e) => setPassword(e.target.value)}
-//             />
-//             <Button
-//               type="submit"
-//               fullWidth
-//               variant="contained"
-//               sx={{ mt: 3, mb: 2 }}
-//               disabled={isLoading}
-//             >
-//               {isLoading ? 'Signing in...' : 'Sign In'}
-//             </Button>
-//           </Box>
-          
-//           <Divider sx={{ my: 2 }} />
-          
-//           <Box sx={{ textAlign: 'center' }}>
-//             <Typography variant="body2">
-//               Don&apos;t have an account?{' '}
-//               <Link href="/auth/signup" style={{ textDecoration: 'none' }}>
-//                 Sign Up
-//               </Link>
-//             </Typography>
-//           </Box>
-//         </Paper>
-//       </Box>
-//     </Container>
-//   );
-// }
-
-
-
-// "use client";
-
-// import { signIn } from "next-auth/react";
-// import { useRouter } from "next/navigation";
-// import { useState } from "react";
-// import {
-//   Container,
-//   Typography,
-//   TextField,
-//   Button,
-//   Box,
-//   Stack
-// } from "@mui/material";
-
-// export default function SignInPage() {
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-//   const router = useRouter();
-
-//   const handleLogin = async () => {
-//     const result = await signIn("credentials", {
-//       redirect: false,
-//       email,
-//       password
-//     });
-
-//     if (result?.ok) router.push("/");
-//   };
-
-//   return (
-//     <Container maxWidth="xs">
-//       <Box mt={8}>
-//         <Typography variant="h5" gutterBottom>Sign In</Typography>
-//         <Stack spacing={2}>
-//           <TextField
-//             label="Email"
-//             type="email"
-//             value={email}
-//             onChange={(e) => setEmail(e.target.value)}
-//             fullWidth
-//           />
-//           <TextField
-//             label="Password"
-//             type="password"
-//             value={password}
-//             onChange={(e) => setPassword(e.target.value)}
-//             fullWidth
-//           />
-//           <Button variant="contained" onClick={handleLogin}>Sign In</Button>
-//         </Stack>
-//       </Box>
-//     </Container>
-//   );
-// }
-
-
 "use client";
-
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -185,70 +10,132 @@ import {
   Box,
   Stack,
   Alert,
+  CircularProgress,
+  Link,
+  Divider,
 } from "@mui/material";
-
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null); // State to hold error message
-  const [loading, setLoading] = useState(false); // Loading state
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    general: null,
+  });
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  const handleLogin = async () => {
-    setError(null); // Reset any previous error
-    setLoading(true); // Show loading state
-
-    const result = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    });
-
-    setLoading(false); // Hide loading state
-
-    if (result?.error) {
-      setError(result.error); // Display error if sign-in fails
-    } else if (result?.ok) {
-      router.push("/"); // Redirect to home if successful
+  // Email validation
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email.trim()) return "Email is required";
+    if (!emailRegex.test(email)) return "Please enter a valid email address";
+    return "";
+  };
+  // Form validation
+  const validateForm = () => {
+    const newErrors = {
+      email: validateEmail(email),
+      password: !password.trim() ? "Password is required" : "",
+      general: null,
+    };
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(
+      (error) => error !== "" && error !== null
+    );
+  };
+  const handleLogin = async (e?: React.FormEvent) => {
+    // Prevent default form submission if called from form submit event
+    if (e) e.preventDefault();
+    // Validate form
+    if (!validateForm()) return;
+    setErrors({ ...errors, general: null });
+    setLoading(true);
+    try {
+      const result = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
+      if (result?.error) {
+        setErrors({ ...errors, general: result.error });
+      } else if (result?.ok) {
+        router.push("/"); // Redirect to home if successful
+      }
+    } catch (error) {
+      setErrors({ ...errors, general: "Failed to connect. Please try again." });
+    } finally {
+      setLoading(false);
     }
   };
-
   return (
     <Container maxWidth="xs">
-      <Box mt={8}>
+      <Box
+        mt={8}
+        component="form"
+        onSubmit={handleLogin}
+        noValidate
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         <Typography variant="h5" gutterBottom>
           Sign In
         </Typography>
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error} {/* Show error message */}
+        {errors.general && (
+          <Alert severity="error" sx={{ mb: 2, width: "100%" }}>
+            {errors.general}
           </Alert>
         )}
-        <Stack spacing={2}>
+        <Stack spacing={2} sx={{ width: "100%" }}>
           <TextField
             label="Email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onBlur={() => setErrors({ ...errors, email: validateEmail(email) })}
+            error={!!errors.email}
+            helperText={errors.email}
             fullWidth
             required
+            disabled={loading}
           />
           <TextField
             label="Password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onBlur={() =>
+              setErrors({
+                ...errors,
+                password: !password.trim() ? "Password is required" : "",
+              })
+            }
+            error={!!errors.password}
+            helperText={errors.password}
             fullWidth
             required
+            disabled={loading}
           />
           <Button
             variant="contained"
-            onClick={handleLogin}
+            type="submit"
+            disabled={loading}
             fullWidth
-            disabled={loading} // Disable button when loading
           >
-            {loading ? "Signing In..." : "Sign In"}
+            {loading ? <CircularProgress size={24} /> : "Sign In"}
           </Button>
+          <Divider sx={{ my: 2 }}>or</Divider>
+          {/* Optional: Add social login buttons here */}
+          <Box textAlign="center" mt={1}>
+            <Typography variant="body2">
+              Dont have an account?
+              <Link href="/auth/signup" underline="hover">
+                Sign Up
+              </Link>
+            </Typography>
+          </Box>
         </Stack>
       </Box>
     </Container>
