@@ -21,7 +21,7 @@ const initialState: CommentState = {
   loading: false,
   error: null,
 };
-export const fetchCommentsByForumId = createAsyncThunk(
+export const fetchCommentsByForumId:any = createAsyncThunk(
   "comment/fetchByForumId",
   async (forumId: string, { rejectWithValue }) => {
     try {
@@ -34,7 +34,7 @@ export const fetchCommentsByForumId = createAsyncThunk(
     }
   }
 );
-export const addComment = createAsyncThunk(
+export const addComment:any = createAsyncThunk(
   "comment/add",
   async (
     { forumId, content }: { forumId: string; content: string },
@@ -54,7 +54,7 @@ export const addComment = createAsyncThunk(
     }
   }
 );
-export const deleteComment = createAsyncThunk(
+export const deleteComment:any = createAsyncThunk(
   "comment/delete",
   async (commentId: string, { rejectWithValue }) => {
     try {
@@ -69,7 +69,7 @@ export const deleteComment = createAsyncThunk(
     }
   }
 );
-export const fetchUserComments = createAsyncThunk(
+export const fetchUserComments:any = createAsyncThunk(
   "forum/fetchUserComments",
   async (_, { rejectWithValue }) => {
     try {
@@ -84,7 +84,7 @@ export const fetchUserComments = createAsyncThunk(
     }
   }
 );
-export const toggleCommentLike = createAsyncThunk(
+export const toggleCommentLike:any = createAsyncThunk(
   "comment/toggleLike",
   async (commentId: string, thunkAPI) => {
     try {

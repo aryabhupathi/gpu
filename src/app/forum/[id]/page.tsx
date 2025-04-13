@@ -11,10 +11,8 @@ import {
   TextField,
   Button,
   List,
-  ListItem,
   Card, CardContent,CardHeader,
   Paper,
-  Divider,
 } from "@mui/material";
 import { ThumbUp } from "@mui/icons-material";
 import { fetchForumById, toggleForumLike } from "@/redux/slices/forumSlice";
@@ -39,7 +37,7 @@ export default function ForumDetailPage() {
     error: commentsError,
   } = useSelector((state: RootState) => state.comment);
   const [newComment, setNewComment] = useState("");
-  const [showComments, setShowComments] = useState(false);=
+  const [showComments, setShowComments] = useState(false);
   useEffect(() => {
     if (id) {
       dispatch(fetchForumById(id as string));

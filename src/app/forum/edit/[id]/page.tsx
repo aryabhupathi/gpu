@@ -45,7 +45,6 @@ export default function EditForumPage() {
       description: description,
       tags: tagsArray,
     };
-    console.log("Request Body for Update:", requestBody);
     try {
       const response = await fetch(`/api/forums/${id}`, {
         method: "PUT",
@@ -61,10 +60,8 @@ export default function EditForumPage() {
         );
       }
       const updatedForum = await response.json();
-      console.log("Forum updated successfully:", updatedForum);
     } catch (error) {
       console.error("Error during forum update:", error);
-      alert(`Error: ${error.message}`);
     }
   };
   if (loading) {

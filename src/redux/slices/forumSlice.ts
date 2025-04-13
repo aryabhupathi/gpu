@@ -30,7 +30,7 @@ const initialState: ForumState = {
   loading: false,
   error: null,
 };
-export const fetchForums = createAsyncThunk(
+export const fetchForums:never = createAsyncThunk(
   "forum/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
@@ -43,7 +43,7 @@ export const fetchForums = createAsyncThunk(
     }
   }
 );
-export const fetchUserForums = createAsyncThunk(
+export const fetchUserForums:any = createAsyncThunk(
   "forum/fetchUserForums",
   async (_, { rejectWithValue }) => {
     try {
@@ -58,7 +58,7 @@ export const fetchUserForums = createAsyncThunk(
     }
   }
 );
-export const fetchForumById = createAsyncThunk(
+export const fetchForumById:any = createAsyncThunk(
   "forum/fetchById",
   async (id: string, { rejectWithValue }) => {
     try {
@@ -71,7 +71,7 @@ export const fetchForumById = createAsyncThunk(
     }
   }
 );
-export const createForum = createAsyncThunk(
+export const createForum:any = createAsyncThunk(
   "forum/create",
   async (
     forumData: { title: string; description: string; tags: string[] },
@@ -92,7 +92,7 @@ export const createForum = createAsyncThunk(
     }
   }
 );
-export const updateForum = createAsyncThunk(
+export const updateForum:any = createAsyncThunk(
   "forum/update",
   async (
     {
@@ -128,7 +128,7 @@ export const updateForum = createAsyncThunk(
     }
   }
 );
-export const deleteForum = createAsyncThunk(
+export const deleteForum:any = createAsyncThunk(
   "forum/delete",
   async (id: string, { rejectWithValue }) => {
     try {
@@ -141,7 +141,7 @@ export const deleteForum = createAsyncThunk(
     }
   }
 );
-export const toggleForumLike = createAsyncThunk(
+export const toggleForumLike:any = createAsyncThunk(
   "forum/toggleLike",
   async (forumId: string, { rejectWithValue }) => {
     try {
