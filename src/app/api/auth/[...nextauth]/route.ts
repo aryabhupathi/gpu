@@ -4,8 +4,6 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import type { NextAuthOptions, User } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import prisma from "@/lib/prisma";
-
-// Auth options
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -17,14 +15,10 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         const { email, password } = credentials!;
-
         const user = await prisma.user.findUnique({ where: { email } });
-
-        // In production, hash and compare passwords securely
         if (!user || user.password !== password) {
           return null;
         }
-
         return {
           id: user.id,
           email: user.email,
@@ -41,13 +35,7 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({
-      token,
-      user,
-    }: {
-      token: JWT;
-      user?: User;
-    }): Promise<JWT> {
+    async jwt({ token, user }: { token: JWT; user?: User }): Promise<JWT> {
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -56,13 +44,7 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    async session({
-      session,
-      token,
-    }: {
-      session:any;
-      token: JWT;
-    }) {
+    async session({ session, token }: { session: any; token: JWT }) {
       session.user.id = token.id;
       session.user.email = token.email;
       session.user.name = token.name;
@@ -71,6 +53,5 @@ export const authOptions: NextAuthOptions = {
     },
   },
 };
-
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

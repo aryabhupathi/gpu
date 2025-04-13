@@ -1,8 +1,9 @@
-import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
+// app/api/forums/[id]/like/route.ts
 export async function POST(_: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -23,7 +24,6 @@ export async function POST(_: Request, { params }: { params: { id: string } }) {
     await prisma.like.delete({
       where: { userId_forumId: { userId: user.id, forumId: params.id } }
     });
-    return NextResponse.json({ liked: false });
   } else {
     await prisma.like.create({
       data: {
@@ -31,6 +31,15 @@ export async function POST(_: Request, { params }: { params: { id: string } }) {
         forumId: params.id
       }
     });
-    return NextResponse.json({ liked: true });
   }
+
+  // Get updated like count
+  const count = await prisma.like.count({
+    where: { forumId: params.id }
+  });
+
+  return NextResponse.json({
+    liked: !existing,
+    likeCount: count
+  });
 }

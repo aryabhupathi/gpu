@@ -1,8 +1,7 @@
-import { configureStore } from '@reduxjs/toolkit';
-import forumReducer from './slices/forumSlice';
-import commentReducer from './slices/commentSlice';
-import authReducer from './slices/authSlice';
-
+import { configureStore } from "@reduxjs/toolkit";
+import forumReducer from "./slices/forumSlice";
+import commentReducer from "./slices/commentSlice";
+import authReducer from "./slices/authSlice";
 export const store = configureStore({
   reducer: {
     forum: forumReducer,
@@ -14,6 +13,5 @@ export const store = configureStore({
       serializableCheck: false,
     }),
 });
-
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

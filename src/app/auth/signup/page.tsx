@@ -25,7 +25,6 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
-  // Password validation
   const validatePassword = (password) => {
     if (password.length < 8) {
       return "Password must be at least 8 characters";
@@ -41,7 +40,6 @@ export default function SignUpPage() {
     }
     return "";
   };
-  // Email validation
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -78,7 +76,6 @@ export default function SignUpPage() {
       const data = await res.json();
       if (res.ok) {
         setSuccess(true);
-        // Delay redirect to show success message
         setTimeout(() => {
           router.push("/auth/signin");
         }, 1500);

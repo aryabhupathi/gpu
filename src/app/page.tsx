@@ -1,4 +1,3 @@
-// app/page.tsx
 "use client";
 import React, { useEffect } from "react";
 import {
@@ -24,7 +23,6 @@ export default function Home() {
     (state: RootState) => state.forum
   );
   const { user } = useSelector((state: RootState) => state.auth);
-
   const [searchTerm, setSearchTerm] = React.useState("");
   useEffect(() => {
     dispatch(fetchForums());
@@ -57,21 +55,20 @@ export default function Home() {
             Join discussions, share ideas, and connect with others.
           </Typography>
           {user ? (
-  <Link href="/forum/create" passHref>
-    <Button
-      variant="contained"
-      startIcon={<AddIcon />}
-      sx={{ textTransform: "none", mt: 2 }}
-    >
-      Create Forum
-    </Button>
-  </Link>
-) : (
-  <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-    Please log in to create a forum.
-  </Typography>
-)}
-
+            <Link href="/forum/create" passHref>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                sx={{ textTransform: "none", mt: 2 }}
+              >
+                Create Forum
+              </Button>
+            </Link>
+          ) : (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              Please log in to create a forum.
+            </Typography>
+          )}
           <TextField
             fullWidth
             placeholder="Search forums..."

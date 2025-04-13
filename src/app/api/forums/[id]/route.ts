@@ -1,280 +1,165 @@
-// import { NextApiRequest, NextApiResponse } from 'next';
-// import { getSession } from 'next-auth/react';
-// import prisma from '@/lib/prisma';
-
-// export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-//   const { id } = req.query;
-//   const session = await getSession({ req });
-
-//   if (!id || typeof id !== 'string') {
-//     return res.status(400).json({ error: 'Invalid forum ID' });
-//   }
-
-//   // GET - Get forum by ID
-//   if (req.method === 'GET') {
-//     try {
-//       const forum = await prisma.forum.findUnique({
-//         where: { id },
-//         include: {
-//           user: {
-//             select: {
-//               id: true,
-//               name: true,
-//               image: true,
-//             },
-//           },
-//           tags: {
-//             include: {
-//               tag: true,
-//             },
-//           },
-//           comments: {
-//             include: {
-//               user: {
-//                 select: {
-//                   name: true,
-//                   image: true,
-//                 },
-//               },
-//             },
-//             orderBy: {
-//               createdAt: 'desc',
-//             },
-//           },
-//           _count: {
-//             select: {
-//               likes: true,
-//             },
-//           },
-//         },
-//       });
-
-//       if (!forum) {
-//         return res.status(404).json({ error: 'Forum not found' });
-//       }
-
-//       // Check if current user has liked this forum
-//       let userLiked = false;
-//       if (session?.user?.id) {
-//         const like = await prisma.like.findUnique({
-//           where: {
-//             userId_forumId: {
-//               userId: session.user.id,
-//               forumId: id,
-//             },
-//           },
-//         });
-//         userLiked = !!like;
-//       }
-
-//       return res.status(200).json({ ...forum, userLiked });
-//     } catch (error) {
-//       return res.status(500).json({ error: 'Failed to fetch forum' });
-//     }
-//   }
-
-//   // PUT - Update forum by ID
-//   if (req.method === 'PUT') {
-//     if (!session) {
-//       return res.status(401).json({ error: 'Unauthorized' });
-//     }
-
-//     try {
-//       // Check if user is the owner of the forum
-//       const forum = await prisma.forum.findUnique({
-//         where: { id },
-//         select: { userId: true },
-//       });
-
-//       if (!forum) {
-//         return res.status(404).json({ error: 'Forum not found' });
-//       }
-
-//       if (forum.userId !== session.user.id) {
-//         return res.status(403).json({ error: 'Forbidden: You can only update your own forums' });
-//       }
-
-//       const { title, description, tags } = req.body;
-
-//       if (!title || !description) {
-//         return res.status(400).json({ error: 'Title and description are required' });
-//       }
-
-//       // First, delete all existing tag relations
-//       await prisma.forumTag.deleteMany({
-//         where: { forumId: id },
-//       });
-
-//       // Then update the forum with new data
-//       const updatedForum = await prisma.forum.update({
-//         where: { id },
-//         data: {
-//           title,
-//           description,
-//           tags: {
-//             create: tags ? tags.map((tagName: string) => ({
-//               tag: {
-//                 connectOrCreate: {
-//                   where: { name: tagName },
-//                   create: { name: tagName },
-//                 },
-//               },
-//             })) : [],
-//           },
-//         },
-//         include: {
-//           user: {
-//             select: {
-//               name: true,
-//               image: true,
-//             },
-//           },
-//           tags: {
-//             include: {
-//               tag: true,
-//             },
-//           },
-//         },
-//       });
-
-//       return res.status(200).json(updatedForum);
-//     } catch (error) {
-//       return res.status(500).json({ error: 'Failed to update forum' });
-//     }
-//   }
-
-//   // DELETE - Delete forum by ID
-//   if (req.method === 'DELETE') {
-//     if (!session) {
-//       return res.status(401).json({ error: 'Unauthorized' });
-//     }
-
-//     try {
-//       // Check if user is the owner of the forum
-//       const forum = await prisma.forum.findUnique({
-//         where: { id },
-//         select: { userId: true },
-//       });
-
-//       if (!forum) {
-//         return res.status(404).json({ error: 'Forum not found' });
-//       }
-
-//       if (forum.userId !== session.user.id) {
-//         return res.status(403).json({ error: 'Forbidden: You can only delete your own forums' });
-//       }
-
-//       // Delete forum
-//       await prisma.forum.delete({
-//         where: { id },
-//       });
-
-//       return res.status(200).json({ message: 'Forum deleted successfully' });
-//     } catch (error) {
-//       return res.status(500).json({ error: 'Failed to delete forum' });
-//     }
-//   }
-
-//   return res.status(405).json({ error: 'Method not allowed' });
-// }
-
-
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-
 export async function GET(_: Request, { params }: { params: { id: string } }) {
-  const forum = await prisma.forum.findUnique({
-    where: { id: params.id },
-    include: { user: true, comments: true }
-  });
-
-  console.log(forum, "ffffff");  // Log forum details to see what’s returned
-
-
-  if (!forum) return NextResponse.json({ error: "Not Found" }, { status: 404 });
-  return NextResponse.json(forum);
+  try {
+    const session = await getServerSession(authOptions);
+    const userEmail = session?.user?.email; // Define userEmail from session
+    const forum = await prisma.forum.findUnique({
+      where: { id: params.id },
+      include: {
+        user: true,
+        comments: true,
+        likes: true,
+        tags: {
+          include: {
+            tag: true, // Include the related tag data
+          },
+        },
+        _count: { select: { likes: true } },
+      },
+    });
+    if (!forum) {
+      return NextResponse.json({ error: "Not Found" }, { status: 404 });
+    }
+    // Get the userId of the logged-in user based on email
+    const user = await prisma.user.findUnique({
+      where: { email: userEmail },
+    });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    // Check if the user has liked the forum
+    const userLiked = forum.likes.some((like) => like.userId === user.id);
+    // Return the forum with userLiked and extracted tag names
+    return NextResponse.json({
+      ...forum,
+      userLiked,
+      tags: forum.tags.map((forumTag) => forumTag.tag.name), // Extract only tag names
+    });
+  } catch (err) {
+    console.error("Error fetching forum:", err);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
 }
-
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const body = await req.json();
+    const { title, description, tags } = body;
+    const forumId = params.id;
+    await prisma.forum.update({
+      where: { id: forumId },
+      data: {
+        title,
+        description,
+      },
+    });
+    await prisma.forumTag.deleteMany({
+      where: { forumId },
+    });
+    for (const tagName of tags) {
+      const tag = await prisma.tag.upsert({
+        where: { name: tagName },
+        update: {},
+        create: { name: tagName },
+      });
+      await prisma.forumTag.create({
+        data: {
+          forumId,
+          tagId: tag.id,
+        },
+      });
+    }
+    const updatedForum = await prisma.forum.findUnique({
+      where: { id: forumId },
+      include: {
+        tags: {
+          include: { tag: true },
+        },
+      },
+    });
+    return NextResponse.json(updatedForum);
+  } catch (error: any) {
+    console.error(" Forum update error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+export async function DELETE(
+  _: Request,
+  { params }: { params: { id: string } }
+) {
   const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
+  if (!session)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const existing = await prisma.forum.findUnique({
     where: { id: params.id },
-    include: { user: true }
+    include: { user: true },
   });
-
   if (existing?.user?.email !== session.user?.email)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-
-  const { title, description, tags } = await req.json();
-  const updated = await prisma.forum.update({
-    where: { id: params.id },
-    data: { title, description, tags }
-  });
-
-  return NextResponse.json(updated);
-}
-
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const existing = await prisma.forum.findUnique({
-    where: { id: params.id },
-    include: { user: true }
-  });
-
-  if (existing?.user?.email !== session.user?.email)
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-
   await prisma.forum.delete({ where: { id: params.id } });
   return NextResponse.json({ message: "Forum deleted" });
 }
-
-export async function POST(req: Request) {
+export async function POST(_: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email)
+  if (!session?.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const { forumId, liked } = await req.json();
-
-  // Find forum by ID
-  const forum = await prisma.forum.findUnique({
-    where: { id: forumId },
-    include: { likes: { where: { userEmail: session.user.email } } }
+  }
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
   });
-
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+  const forum = await prisma.forum.findUnique({
+    where: { id: params.id },
+  });
   if (!forum) {
     return NextResponse.json({ error: "Forum not found" }, { status: 404 });
   }
-
-  // Handle like toggle logic
-  if (liked) {
-    // Add like if not already liked
-    if (!forum.likes.length) {
-      await prisma.forum.update({
-        where: { id: forumId },
-        data: { likes: { connect: { userEmail: session.user.email } } }
-      });
-    }
-  } else {
-    // Remove like if already liked
-    if (forum.likes.length) {
-      await prisma.forum.update({
-        where: { id: forumId },
-        data: { likes: { disconnect: { userEmail: session.user.email } } }
-      });
-    }
+  if (forum.userId === user.id) {
+    return NextResponse.json(
+      { error: "You cannot like your own forum" },
+      { status: 400 }
+    );
   }
-
-  // Return updated forum with like count
-  const updatedForum = await prisma.forum.findUnique({
-    where: { id: forumId },
-    include: { _count: { select: { likes: true } } }
+  const existingLike = await prisma.like.findUnique({
+    where: {
+      userId_forumId: {
+        userId: user.id,
+        forumId: params.id,
+      },
+    },
   });
-
-  return NextResponse.json(updatedForum);
+  if (existingLike) {
+    await prisma.like.delete({
+      where: {
+        userId_forumId: {
+          userId: user.id,
+          forumId: params.id,
+        },
+      },
+    });
+  } else {
+    await prisma.like.create({
+      data: {
+        userId: user.id,
+        forumId: params.id,
+      },
+    });
+  }
+  const likeCount = await prisma.like.count({
+    where: { forumId: params.id },
+  });
+  return NextResponse.json({
+    liked: !existingLike,
+    likeCount,
+  });
 }
