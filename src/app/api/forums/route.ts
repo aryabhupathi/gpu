@@ -12,7 +12,7 @@ export async function GET() {
     },
     orderBy: { createdAt: "desc" },
   });
-  console.log("Forums with tags:", forums); // Log the fetched forums
+  console.log("Forums with tags:", forums); 
   return NextResponse.json(forums);
 }
 export async function POST(req: Request) {

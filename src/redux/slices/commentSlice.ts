@@ -125,7 +125,7 @@ const commentSlice = createSlice({
       })
       .addCase(addComment.fulfilled, (state, action) => {
         state.loading = false;
-        state.comments.unshift(action.payload); // add new comment at top
+        state.comments.unshift(action.payload); 
       })
       .addCase(toggleCommentLike.fulfilled, (state, action) => {
         const { commentId, liked, count } = action.payload;

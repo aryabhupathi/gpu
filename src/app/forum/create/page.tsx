@@ -26,7 +26,7 @@ export default function CreateForumPage() {
   return (
     <Container maxWidth="sm">
       <Box mt={5}>
-        <Typography variant="h5" gutterBottom>
+        <Typography variant="h5" gutterBottom textAlign="center">
           Create New Forum
         </Typography>
         <Stack spacing={2}>

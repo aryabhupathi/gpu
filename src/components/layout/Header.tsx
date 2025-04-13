@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -27,13 +27,27 @@ export default function Header() {
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
     setAnchorEl(null);
+  };
+  const handleProfile = () => {
+    handleClose();
+    navigate.push("/profile");
+  };
+  const handleSignin = () => {
+    handleClose();
+    navigate.push("/auth/signin");
+  };
+  const handleSignOut = async () => {
+    handleClose();
+    await signOut({ redirect: false });
+    dispatch(clearUser());
+    navigate.push("/");
   };
   useEffect(() => {
     if (session?.user) {
@@ -48,16 +62,6 @@ export default function Header() {
       dispatch(clearUser());
     }
   }, [session, dispatch]);
-  const handleSignOut = async () => {
-    handleClose();
-    await signOut({ redirect: false });
-    dispatch(clearUser());
-    navigate.push("/");
-  };
-  const handleProfile = () => {
-    handleClose();
-    navigate.push("/profile");
-  };
   return (
     <AppBar position="static">
       <Toolbar>
@@ -75,61 +79,78 @@ export default function Header() {
           Community Forums
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          {isAuthenticated ? (
-            <>
-              <Button
-                component={Link}
-                href="/forum/create"
-                variant="contained"
-                color="secondary"
-                startIcon={<AddIcon />}
-                sx={{ mr: 2 }}
-              >
-                New Forum
-              </Button>
-              <IconButton
-                onClick={handleMenu}
-                size="small"
-                sx={{ ml: 2 }}
-                aria-controls={open ? "account-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? "true" : undefined}
-              >
-                <Avatar
-                  alt={user?.name || "User"}
-                  src={user?.image || ""}
-                  sx={{ width: 32, height: 32 }}
-                >{!user?.image && (user?.name?.charAt(0).toUpperCase() || "U")}</Avatar>
-              </IconButton>
-              <Menu
-                id="account-menu"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-                transformOrigin={{ horizontal: "right", vertical: "top" }}
-                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-              >
+          {isAuthenticated && (
+            <Button
+              component={Link}
+              href="/forum/create"
+              variant="contained"
+              color="secondary"
+              startIcon={<AddIcon />}
+              sx={{ mr: 2 }}
+            >
+              New Forum
+            </Button>
+          )}
+          {/* Avatar Menu (common for both cases) */}
+          <IconButton onClick={handleMenu} size="small" sx={{ ml: 1 }}>
+            <Avatar
+              alt={user?.name || "User"}
+              src={user?.image || ""}
+              sx={{ width: 32, height: 32 }}
+            >
+              {!user?.image && (user?.name?.charAt(0).toUpperCase() || "U")}
+            </Avatar>
+          </IconButton>
+          {/* <Menu
+            id="account-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            transformOrigin={{ horizontal: "right", vertical: "top" }}
+            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+          >
+            {isAuthenticated ? (
+              <>
                 <MenuItem onClick={handleProfile}>Profile</MenuItem>
                 <Divider />
                 <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
-              </Menu>
-            </>
-          ) : (
-            <>
-              <Button color="inherit" component={Link} href="/auth/signin">
-                Sign In
-              </Button>
-              <Button
-                color="secondary"
-                variant="contained"
-                component={Link}
-                href="/auth/signup"
-                sx={{ ml: 1 }}
-              >
-                Sign Up
-              </Button>
-            </>
-          )}
+              </>
+            ) : (
+              <>
+                <MenuItem disabled>Guest</MenuItem>
+                <Divider />
+                <MenuItem onClick={handleSignin}>Sign In</MenuItem>
+              </>
+            )}
+          </Menu> */}
+          <Menu
+            id="account-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            transformOrigin={{ horizontal: "right", vertical: "top" }}
+            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+          >
+            {isAuthenticated
+              ? [
+                  <MenuItem key="profile" onClick={handleProfile}>
+                    Profile
+                  </MenuItem>,
+                  <Divider key="divider-1" />,
+                  <MenuItem key="signout" onClick={handleSignOut}>
+                    Sign out
+                  </MenuItem>,
+                ]
+              : [
+                  <MenuItem key="guest" disabled>
+                    Guest
+                  </MenuItem>,
+                  <Divider key="divider-2" />,
+                  <MenuItem key="signin" onClick={handleSignin}>
+                    Sign In
+                  </MenuItem>,
+                ]}
+          </Menu>
         </Box>
       </Toolbar>
     </AppBar>

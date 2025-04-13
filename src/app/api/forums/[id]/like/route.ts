@@ -3,7 +3,6 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-// app/api/forums/[id]/like/route.ts
 export async function POST(_: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -33,7 +32,6 @@ export async function POST(_: Request, { params }: { params: { id: string } }) {
     });
   }
 
-  // Get updated like count
   const count = await prisma.like.count({
     where: { forumId: params.id }
   });

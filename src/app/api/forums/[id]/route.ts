@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth";
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    const userEmail = session?.user?.email; // Define userEmail from session
+    const userEmail = session?.user?.email;
     const forum = await prisma.forum.findUnique({
       where: { id: params.id },
       include: {
@@ -14,7 +14,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
         likes: true,
         tags: {
           include: {
-            tag: true, // Include the related tag data
+            tag: true,
           },
         },
         _count: { select: { likes: true } },
@@ -23,20 +23,19 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     if (!forum) {
       return NextResponse.json({ error: "Not Found" }, { status: 404 });
     }
-    // Get the userId of the logged-in user based on email
-    const user = await prisma.user.findUnique({
-      where: { email: userEmail },
-    });
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    let userLiked = false;
+    if (userEmail) {
+      const user = await prisma.user.findUnique({
+        where: { email: userEmail },
+      });
+      if (user) {
+        userLiked = forum.likes.some((like) => like.userId === user.id);
+      }
     }
-    // Check if the user has liked the forum
-    const userLiked = forum.likes.some((like) => like.userId === user.id);
-    // Return the forum with userLiked and extracted tag names
     return NextResponse.json({
       ...forum,
       userLiked,
-      tags: forum.tags.map((forumTag) => forumTag.tag.name), // Extract only tag names
+      tags: forum.tags.map((forumTag) => forumTag.tag.name),
     });
   } catch (err) {
     console.error("Error fetching forum:", err);

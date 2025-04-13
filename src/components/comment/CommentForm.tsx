@@ -136,7 +136,7 @@ export default function ForumDetail() {
             }}
           >
             <Typography variant="h4" component="h1" gutterBottom>
-              {currentForum.title}
+              {/* {currentForum.title} */}
             </Typography>
             {isOwner && (
               <Box>

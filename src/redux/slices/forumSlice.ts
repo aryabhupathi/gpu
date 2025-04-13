@@ -30,7 +30,6 @@ const initialState: ForumState = {
   loading: false,
   error: null,
 };
-// Async Thunks
 export const fetchForums = createAsyncThunk(
   "forum/fetchAll",
   async (_, { rejectWithValue }) => {
@@ -121,7 +120,7 @@ export const updateForum = createAsyncThunk(
           withCredentials: true,
         }
       );
-      return response.data; // This will become action.payload
+      return response.data; 
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.error || "Failed to update forum"
@@ -142,7 +141,6 @@ export const deleteForum = createAsyncThunk(
     }
   }
 );
-// ✅ Fixed like endpoint path to `/likes`
 export const toggleForumLike = createAsyncThunk(
   "forum/toggleLike",
   async (forumId: string, { rejectWithValue }) => {
@@ -156,7 +154,6 @@ export const toggleForumLike = createAsyncThunk(
     }
   }
 );
-// Slice
 const forumSlice = createSlice({
   name: "forum",
   initialState,
