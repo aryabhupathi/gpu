@@ -4,7 +4,6 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  Button,
   IconButton,
   Box,
   Avatar,
@@ -12,7 +11,6 @@ import {
   MenuItem,
   Divider,
 } from "@mui/material";
-import { Add as AddIcon } from "@mui/icons-material";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -79,19 +77,6 @@ export default function Header() {
           Community Forums
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          {isAuthenticated && (
-            <Button
-              component={Link}
-              href="/forum/create"
-              variant="contained"
-              color="secondary"
-              startIcon={<AddIcon />}
-              sx={{ mr: 2 }}
-            >
-              New Forum
-            </Button>
-          )}
-          {/* Avatar Menu (common for both cases) */}
           <IconButton onClick={handleMenu} size="small" sx={{ ml: 1 }}>
             <Avatar
               alt={user?.name || "User"}

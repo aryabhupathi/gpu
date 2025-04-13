@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
 import { fetchUserForums, deleteForum } from "@/redux/slices/forumSlice";
 import { fetchUserComments } from "@/redux/slices/commentSlice";
 import ForumCard from "@/components/forum/ForumCard";
@@ -23,7 +22,6 @@ import { RootState } from "@/redux/store";
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const dispatch = useDispatch();
-  const router = useRouter();
 
   const forums = useSelector((state: RootState) => state.forum.userForums);
   const comments = useSelector((state: RootState) => state.comment.comments);

@@ -16,10 +16,13 @@ interface ForumCardProps {
       id: string;
       name: string;
     };
-    comments?: { length: number };
-    likes?: { length: number };
+    _count?: {
+      likes: number;
+      comments: number;
+    };
   };
 }
+
 
 export default function ForumCard({ forum }: ForumCardProps) {
   const router = useRouter();
@@ -55,10 +58,10 @@ export default function ForumCard({ forum }: ForumCardProps) {
           Created at: {new Date(forum.createdAt).toLocaleString()}
         </Typography>
         <Typography variant="caption" color="text.disabled" display="block">
-          Comments: ({forum.comments?.length || 0})
+          Comments: ({forum._count?.comments || 0})
         </Typography>
         <Typography variant="caption" color="text.disabled" display="block">
-          Likes: ({forum.likes?.length || 0})
+          Likes: ({forum._count?.likes || 0})
         </Typography>
       </CardContent>
     </Card>
