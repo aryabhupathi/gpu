@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+#  ConnectForum – A Modern Community Forum Platform
 
-## Getting Started
+**ConnectForum** is a full-stack forum website where users can create and participate in forum discussions. Whether it's for asking questions, sharing ideas, or collaborating on projects, this platform allows users to connect through engaging conversations.
 
-First, run the development server:
+Built with modern tools like **Next.js**, **TypeScript**, and **Material UI**, and backed by **Prisma** and **MySQL**, ConnectForum is optimized for performance, scalability, and developer experience.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+##  Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+-  **User Authentication** – Register and log in securely with **NextAuth**
+-  **Create Forums** – Authenticated users can create their own forums
+-  **Comment System** – View comments on forums and participate in discussions
+-  **Material UI** – Clean, responsive, and accessible design
+-  **Prisma ORM** – Simplified database access with auto-generated types
+-  **MySQL Database** – Store user, forum, and comment data reliably
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+##  Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+| Technology     | Description                                 |
+|----------------|---------------------------------------------|
+| **Next.js**     | React framework with server-side rendering |
+| **TypeScript**  | Strongly typed JavaScript                  |
+| **NextAuth.js** | Authentication solution for Next.js        |
+| **Material UI** | Component library for fast UI development  |
+| **Prisma**      | Next-gen ORM for database access           |
+| **MySQL**       | Relational database management system      |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+##  Project Structure
 
-## Deploy on Vercel
+- /app /api - API routes (forums, auth, comments) 
+- /auth - NextAuth configuration 
+- /forums - Forum creation and listing pages 
+- /components - Reusable UI components 
+- /prisma schema.prisma - Prisma DB schema 
+- .env - Environment configuration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+##  Installation & Setup
+
+Follow these steps to run the project locally:
+
+### 1. Clone the Repository
+
+  git clone https://github.com/your-username/connectforum.git
+  
+  cd connectforum
+
+### 2. Install Dependencies
+- npm install
+- npm install @mui/material @emotion/react @emotion/styled
+- npm install @mui/icons-material
+- npm install next-auth
+- npm install @reduxjs/toolkit react-redux
+- npm install date-fns
+
+### 3. Configure Environment Variables
+Create a .env file in the root of your project with the following:
+
+- DATABASE_URL="mysql://USER:PASSWORD@localhost:3306/dbname"
+- NEXTAUTH_SECRET=your_random_secret
+
+Replace USER, PASSWORD, and dbname with your MySQL credentials.
+### 4. Set Up Prisma
+Generate Prisma client and run the initial migration:
+
+- npx prisma generate
+- npx prisma migrate dev --name init
+  
+ This will create the required tables in your MySQL database.
+
+### 5. Start the Development Server
+
+- npm run dev
+
+Now visit http://localhost:3000 to see the app in action.
