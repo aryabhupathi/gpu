@@ -1,64 +1,13 @@
+import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { Container, Typography } from "@mui/material";
+import ProfileClient from "./ProfileClient";
 
-  "use client";
-import { useSession } from "next-auth/react";
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchUserForums, deleteForum } from "@/redux/slices/forumSlice";
-import { fetchUserComments } from "@/redux/slices/commentSlice";
-import ForumCard from "@/components/forum/ForumCard";
-import {
-  Container,
-  Typography,
-  Divider,
-  Button,
-  Box,
-  CircularProgress,
-  Paper,
-} from "@mui/material";
-import Grid from "@mui/material/Grid"
-import Link from "next/link";
-import { RootState } from "@/redux/store";
+export default async function ProfilePage() {
+  const session = await getServerSession(authOptions);
 
-export default function ProfilePage() {
-  const { data: session, status } = useSession();
-  const dispatch = useDispatch();
-
-  const forums = useSelector((state: RootState) => state.forum.userForums);
-  const comments = useSelector((state: RootState) => state.comment.comments);
-  const forumLoading = useSelector((state: RootState) => state.forum.loading);
-  const commentLoading = useSelector(
-    (state: RootState) => state.comment.loading
-  );
-
-  useEffect(() => {
-    if (session?.user?.id) {
-      dispatch(fetchUserForums() as any);
-      dispatch(fetchUserComments() as any);
-    }
-  }, [session, dispatch]);
-
-
-  const handleDelete = async (forumId: string) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this forum?"
-    );
-    if (!confirmDelete) return;
-    try {
-      await dispatch(deleteForum(forumId) as any);
-    } catch (err) {
-      console.error("Delete failed", err);
-    }
-  };
-
-  if (status === "loading") {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (!session) {
+  if (!session?.user?.email) {
     return (
       <Container maxWidth="sm" sx={{ mt: 6 }}>
         <Typography variant="h6" align="center">
@@ -68,87 +17,84 @@ export default function ProfilePage() {
     );
   }
 
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  const forums = await prisma.forum.findMany({
+    where: { userId: user.id },
+    include: {
+      user: true,
+      tags: { include: { tag: true } },
+      _count: { select: { likes: true, comments: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const comments = await prisma.comment.findMany({
+    where: { userId: user.id },
+    include: {
+      forum: { select: { title: true } },
+      _count: { select: { likes: true } }
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const likedForums = await prisma.forumLike.findMany({
+    where: { userId: user.id },
+    include: {
+      forum: {
+        include: {
+          user: true,
+          tags: { include: { tag: true } },
+          _count: { select: { likes: true, comments: true } },
+        }
+      }
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  // Format dates and tags for Client Component
+  const formattedUser = {
+    ...user,
+    createdAt: user.createdAt.toISOString(),
+    updatedAt: user.updatedAt.toISOString(),
+  };
+
+  const formattedForums = forums.map(f => ({ 
+    ...f, 
+    createdAt: f.createdAt.toISOString(),
+    updatedAt: f.updatedAt.toISOString(),
+    tags: f.tags.map(t => t.tag.name) 
+  }));
+
+  const formattedComments = comments.map(c => ({
+    ...c,
+    createdAt: c.createdAt.toISOString(),
+    updatedAt: c.updatedAt.toISOString(),
+  }));
+
+  const formattedLikedForums = likedForums.map(l => ({ 
+    ...l, 
+    createdAt: l.createdAt.toISOString(),
+    forum: { 
+      ...l.forum, 
+      createdAt: l.forum?.createdAt.toISOString(),
+      updatedAt: l.forum?.updatedAt.toISOString(),
+      tags: l.forum?.tags.map(t => t.tag.name) || [] 
+    } 
+  }));
+
   return (
-    <Container maxWidth="md" sx={{ mt: 4, mb: 6 }}>
-      <Typography variant="h4" align="center" gutterBottom>
-        Welcome, {session.user.name || "User"}
-      </Typography>
-
-      {/* Forums Section */}
-      <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
-        Your Forums
-      </Typography>
-        {forumLoading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress />
-          </Box>
-        ) : forums.length > 0 ? (
-          <Grid container spacing={2}>
-            {forums.map((forum: any) => (
-              <Grid item size={{xs:12, lg:4}} key={forum.id}>
-                <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-                  <ForumCard forum={forum} />
-                  <Box sx={{ display: "flex", gap: 1, mt: 1, justifyContent:"center" }}>
-                    <Link href={`/forum/edit/${forum.id}`} passHref>
-                      <Button variant="outlined" size="small">
-                        Edit
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      size="small"
-                      onClick={() => handleDelete(forum.id)}
-                    >
-                      Delete
-                    </Button>
-                  </Box>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        ) : (
-          <Typography variant="body2" color="text.secondary">
-            You haven't created any forums yet.
-          </Typography>
-        )}
-
-      <Divider sx={{ my: 4 }} />
-
-      {/* Comments Section */}
-      <Typography variant="h6" gutterBottom>
-        Your Comments
-      </Typography>
-      <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-        {commentLoading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress />
-          </Box>
-        ) : comments.length > 0 ? (
-          <Grid container spacing={2}>
-            {comments.map((comment: any) => (
-              <Grid item size={{xs:12, lg:4}} key={comment.id}>
-                <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-                  <Typography variant="body2" gutterBottom>
-                    On forum{" "}
-                    <Link href={`/forum/${comment.forumId}`}>
-                      <strong>{comment.forumTitle}</strong>
-                    </Link>
-                    : {comment.content}
-                  </Typography>
-                  <Typography variant="caption" color="text.disabled">
-                    {new Date(comment.createdAt).toLocaleString()}
-                  </Typography>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        ) : (
-          <Typography variant="body2" color="text.secondary">
-            You haven't commented on any forums yet.
-          </Typography>
-        )}
-      </Paper>
-    </Container>
+    <ProfileClient 
+      user={formattedUser} 
+      forums={formattedForums} 
+      comments={formattedComments} 
+      likedForums={formattedLikedForums}
+    />
   );
 }

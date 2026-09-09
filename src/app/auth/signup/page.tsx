@@ -1,6 +1,10 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import {
   Container,
   Typography,
@@ -12,85 +16,59 @@ import {
   CircularProgress,
   Link,
 } from "@mui/material";
+
+const signUpSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+
+type SignUpValues = z.infer<typeof signUpSchema>;
+
 export default function SignUpPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({
-    name: "",
-    email: "",
-    password: "",
-    general: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const router = useRouter();
-  const validatePassword = (password) => {
-    if (password.length < 8) {
-      return "Password must be at least 8 characters";
-    }
-    if (!/[A-Z]/.test(password)) {
-      return "Password must contain at least one uppercase letter";
-    }
-    if (!/[a-z]/.test(password)) {
-      return "Password must contain at least one lowercase letter";
-    }
-    if (!/[0-9]/.test(password)) {
-      return "Password must contain at least one number";
-    }
-    return "";
-  };
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return "Please enter a valid email address";
-    }
-    return "";
-  };
-  const validateForm = () => {
-    const newErrors = {
-      name: name.trim() === "" ? "Name is required" : "",
-      email: email.trim() === "" ? "Email is required" : validateEmail(email),
-      password:
-        password === "" ? "Password is required" : validatePassword(password),
-      general: "",
-    };
-    setErrors(newErrors);
-    return !Object.values(newErrors).some((error) => error !== "");
-  };
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) {
-      return;
-    }
-    setLoading(true);
-    setErrors({ ...errors, general: "" });
-    try {
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        body: JSON.stringify({ name, email, password }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setSuccess(true);
-        setTimeout(() => {
-          router.push("/auth/signin");
-        }, 1500);
-      } else {
-        setErrors({ ...errors, general: data.error || "Signup failed" });
+  const [generalError, setGeneralError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignUpValues>({
+    resolver: zodResolver(signUpSchema),
+  });
+
+  const onSubmit = (data: SignUpValues) => {
+    setGeneralError(null);
+    startTransition(async () => {
+      try {
+        const res = await fetch("/api/auth/signup", {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const resData = await res.json();
+        
+        if (res.ok) {
+          setSuccess(true);
+          setTimeout(() => {
+            router.push("/auth/signin");
+          }, 1500);
+        } else {
+          setGeneralError(resData.error || "Signup failed");
+        }
+      } catch {
+        setGeneralError("Network error. Please try again.");
       }
-    } catch (error) {
-      setErrors({ ...errors, general: "Network error. Please try again." });
-    } finally {
-      setLoading(false);
-    }
+    });
   };
+
   return (
     <Container maxWidth="xs">
-      <Box mt={8} component="form" onSubmit={handleSignup} noValidate>
+      <Box mt={8} component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
         <Typography variant="h5" gutterBottom align="center">
           Create an Account
         </Typography>
@@ -99,71 +77,51 @@ export default function SignUpPage() {
             Account created successfully! Redirecting to login...
           </Alert>
         )}
-        {errors.general && (
+        {generalError && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            {errors.general}
+            {generalError}
           </Alert>
         )}
         <Stack spacing={2}>
           <TextField
             label="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onBlur={() =>
-              setErrors({
-                ...errors,
-                name: name.trim() === "" ? "Name is required" : "",
-              })
-            }
+            {...register("name")}
             error={!!errors.name}
-            helperText={errors.name}
+            helperText={errors.name?.message}
             fullWidth
             required
-            disabled={loading}
+            disabled={isPending || success}
+            InputLabelProps={{ shrink: true }}
           />
           <TextField
             label="Email"
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onBlur={() => {
-              if (email.trim() === "") {
-                setErrors({ ...errors, email: "Email is required" });
-              } else {
-                setErrors({ ...errors, email: validateEmail(email) });
-              }
-            }}
+            {...register("email")}
             error={!!errors.email}
-            helperText={errors.email}
+            helperText={errors.email?.message}
             fullWidth
             required
-            disabled={loading}
+            disabled={isPending || success}
+            InputLabelProps={{ shrink: true }}
           />
           <TextField
             label="Password"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onBlur={() => {
-              if (password === "") {
-                setErrors({ ...errors, password: "Password is required" });
-              } else {
-                setErrors({ ...errors, password: validatePassword(password) });
-              }
-            }}
+            {...register("password")}
             error={!!errors.password}
-            helperText={errors.password}
+            helperText={errors.password?.message}
             fullWidth
             required
-            disabled={loading}
+            disabled={isPending || success}
+            InputLabelProps={{ shrink: true }}
           />
           <Button
             variant="contained"
             type="submit"
-            disabled={loading}
+            disabled={isPending || success}
             fullWidth
           >
-            {loading ? <CircularProgress size={24} /> : "Sign Up"}
+            {isPending ? <CircularProgress size={24} /> : "Sign Up"}
           </Button>
           <Box textAlign="center" mt={1}>
             <Typography variant="body2">

@@ -8,7 +8,7 @@ export default function NotFoundPage() {
         404 - Page Not Found
       </Typography>
       <Typography gutterBottom>
-        The page you're looking for doesn't exist.
+        The page you&apos;re looking for doesn&apos;t exist.
       </Typography>
       <Button variant="contained" onClick={() => router.push("/")}>
         Return Home

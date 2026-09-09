@@ -1,17 +1,19 @@
 
 
 import { Inter } from "next/font/google";
-import CssBaseline from "@mui/material/CssBaseline";
 import { ReduxProvider } from "@/redux/provider";
 import { AuthProvider } from "./provider/AuthProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import Sidebar from "@/components/layout/Sidebar";
 import { Box } from "@mui/material"; 
+import ThemeProviderClient from "./ThemeProviderClient";
+import "@uploadthing/react/styles.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 
 export const metadata = {
-  title: "Community Forums",
+  title: "letstalk",
   description: "A place to discuss and share ideas with the community",
 };
 
@@ -21,29 +23,35 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className={`${inter.variable}`}>
+      <body className={inter.className} style={{ margin: 0, padding: 0 }}>
         <ReduxProvider>
           <AuthProvider>
-            <CssBaseline />
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                minHeight: "100vh", 
-              }}
-            >
-              <Header />
-              <Box
-                component="main"
-                sx={{
-                  flexGrow: 1,
-                }}
-              >
-                {children}
+            <ThemeProviderClient>
+              <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+                <Header />
+                <Box sx={{ display: "flex", flexGrow: 1, overflow: "hidden" }}>
+                  <Sidebar sx={{ display: { xs: "none", md: "flex" } }} />
+                  
+                  <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", overflowY: "auto", bgcolor: "#F3F4F6", width: { xs: "100%", md: "calc(100% - 280px)" } }}>
+                    <Box
+                      component="main"
+                      sx={{
+                        flexGrow: 1,
+                        p: { xs: 2, md: 4 },
+                        bgcolor: "#FFFFFF",
+                        m: { xs: 1, md: 2 },
+                        borderRadius: 4,
+                        boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+                      }}
+                    >
+                      {children}
+                    </Box>
+                    <Footer />
+                  </Box>
+                </Box>
               </Box>
-              <Footer />
-            </Box>
+            </ThemeProviderClient>
           </AuthProvider>
         </ReduxProvider>
       </body>

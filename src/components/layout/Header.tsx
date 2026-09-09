@@ -10,22 +10,31 @@ import {
   Menu,
   MenuItem,
   Divider,
+  Tooltip,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import GroupIcon from "@mui/icons-material/Group";
+import ChatIcon from "@mui/icons-material/Chat";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser, clearUser } from "@/redux/slices/authSlice";
 import { RootState } from "@/redux/store";
+import MenuIcon from "@mui/icons-material/Menu";
+import { Drawer } from "@mui/material";
+import Sidebar from "./Sidebar";
+import NotificationBell from "./NotificationBell";
 export default function Header() {
   const { data: session } = useSession();
   const navigate = useRouter();
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
   const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated
+    (state: RootState) => state.auth.isAuthenticated,
   );
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const open = Boolean(anchorEl);
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -47,6 +56,28 @@ export default function Header() {
     dispatch(clearUser());
     navigate.push("/");
   };
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<{forums: any[], users: any[]}>({forums: [], users: []});
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    if (searchQuery.length < 2) {
+      setSearchResults({forums: [], users: []});
+      setShowDropdown(false);
+      return;
+    }
+    const delayDebounceFn = setTimeout(() => {
+      fetch(`/api/search?q=${searchQuery}`)
+        .then(res => res.json())
+        .then(data => {
+          setSearchResults(data);
+          setShowDropdown(true);
+        })
+        .catch(console.error);
+    }, 300);
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
   useEffect(() => {
     if (session?.user) {
       dispatch(
@@ -54,60 +85,139 @@ export default function Header() {
           name: session.user.name || "",
           image: session.user.image || null,
           email: session.user.email || "",
-        })
+        }),
       );
     } else {
       dispatch(clearUser());
     }
   }, [session, dispatch]);
   return (
-    <AppBar position="static">
-      <Toolbar>
-        <Typography
-          variant="h6"
-          component={Link}
-          href="/"
-          sx={{
-            flexGrow: 1,
-            textDecoration: "none",
-            color: "inherit",
-            fontWeight: "bold",
-          }}
-        >
-          Community Forums
-        </Typography>
+    <AppBar
+      position="sticky"
+      sx={{
+        bgcolor: "#FFFFFF",
+        color: "#1F2937",
+        boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
+      }}
+    >
+      <Toolbar sx={{ justifyContent: "space-between" }}>
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          <IconButton onClick={handleMenu} size="small" sx={{ ml: 1 }}>
-            <Avatar
-              alt={user?.name || "User"}
-              src={user?.image || ""}
-              sx={{ width: 32, height: 32 }}
-            >
-              {!user?.image && (user?.name?.charAt(0).toUpperCase() || "U")}
-            </Avatar>
-          </IconButton>
-          {/* <Menu
-            id="account-menu"
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            transformOrigin={{ horizontal: "right", vertical: "top" }}
-            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={() => setMobileOpen(true)}
+            sx={{ mr: 2, display: { md: "none" } }}
           >
-            {isAuthenticated ? (
-              <>
-                <MenuItem onClick={handleProfile}>Profile</MenuItem>
-                <Divider />
-                <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
-              </>
-            ) : (
-              <>
-                <MenuItem disabled>Guest</MenuItem>
-                <Divider />
-                <MenuItem onClick={handleSignin}>Sign In</MenuItem>
-              </>
+            <MenuIcon />
+          </IconButton>
+          <Typography
+            variant="h6"
+            component={Link}
+            href="/"
+            sx={{
+              textDecoration: "none",
+              color: "transparent",
+              fontWeight: 800,
+              backgroundClip: "text",
+              backgroundImage:
+                "linear-gradient(90deg, #7C3AED 0%, #3B82F6 100%)",
+              letterSpacing: "-0.05em",
+              fontSize: "1.5rem",
+            }}
+          >
+            letstalk
+          </Typography>
+        </Box>
+
+        {/* Search Bar */}
+        <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', mx: 2, position: 'relative' }}>
+          <Box sx={{ position: 'relative', width: { xs: '100%', md: '400px' } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: '#F1F5F9', borderRadius: 4, px: 2, py: 0.5 }}>
+              <SearchIcon sx={{ color: '#94A3B8', mr: 1 }} />
+              <input 
+                type="text" 
+                placeholder="Search posts, users..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                onFocus={() => { if (searchQuery.length >= 2) setShowDropdown(true); }}
+                style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', padding: '8px 0', fontSize: '1rem', color: '#334155' }}
+              />
+            </Box>
+
+            {/* Dropdown Results */}
+            {showDropdown && (searchResults.forums.length > 0 || searchResults.users.length > 0) && (
+              <Paper 
+                elevation={4} 
+                sx={{ 
+                  position: 'absolute', top: '100%', left: 0, right: 0, mt: 1, 
+                  borderRadius: 3, border: '1px solid #E2E8F0', overflow: 'hidden', zIndex: 9999 
+                }}
+              >
+                {searchResults.users.length > 0 && (
+                  <Box>
+                    <Typography variant="overline" sx={{ px: 2, py: 1, display: 'block', bgcolor: '#F8FAFC', color: '#64748B' }}>Users</Typography>
+                    {searchResults.users.map(u => (
+                      <MenuItem key={u.id} onClick={() => navigate.push(`/u/${u.id}`)} sx={{ py: 1.5 }}>
+                        <Avatar src={u.image || ""} sx={{ width: 24, height: 24, mr: 1, fontSize: '0.8rem' }}>{u.name?.charAt(0)}</Avatar>
+                        <Typography variant="body2">{u.name}</Typography>
+                      </MenuItem>
+                    ))}
+                  </Box>
+                )}
+                {searchResults.forums.length > 0 && (
+                  <Box>
+                    <Typography variant="overline" sx={{ px: 2, py: 1, display: 'block', bgcolor: '#F8FAFC', color: '#64748B' }}>Posts</Typography>
+                    {searchResults.forums.map(f => (
+                      <MenuItem key={f.id} onClick={() => navigate.push(`/forum/${f.id}`)} sx={{ py: 1.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                        <Typography variant="body2" fontWeight={600} noWrap sx={{ width: '100%' }}>{f.title}</Typography>
+                      </MenuItem>
+                    ))}
+                  </Box>
+                )}
+              </Paper>
             )}
-          </Menu> */}
+          </Box>
+        </Box>
+
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {session ? (
+            <>
+              <NotificationBell />
+              <IconButton
+                onClick={handleMenu}
+                size="small"
+                sx={{ ml: 1, padding: 0.5, border: "2px solid #E2E8F0" }}
+                aria-controls={open ? "account-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? "true" : undefined}
+              >
+                <Avatar
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    background: "linear-gradient(135deg, #7C3AED 0%, #3B82F6 100%)",
+                    fontWeight: 700,
+                    fontSize: "1rem"
+                  }}
+                >
+                  {session.user?.name?.charAt(0) || "U"}
+                </Avatar>
+              </IconButton>
+            </>
+          ) : (
+            <IconButton onClick={handleMenu} size="small" sx={{ ml: 1 }}>
+              <Avatar
+                alt={user?.name || "User"}
+                src={
+                  user?.image ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "User")}&background=random`
+                }
+                sx={{ width: 32, height: 32 }}
+              />
+            </IconButton>
+          )}
           <Menu
             id="account-menu"
             anchorEl={anchorEl}
@@ -118,8 +228,25 @@ export default function Header() {
           >
             {isAuthenticated
               ? [
+                  ...(session?.user?.role === "ADMIN"
+                    ? [
+                        <MenuItem
+                          key="admin"
+                          onClick={() => {
+                            handleClose();
+                            navigate.push("/admin");
+                          }}
+                        >
+                          Admin Dashboard
+                        </MenuItem>,
+                        <Divider key="divider-admin" />,
+                      ]
+                    : []),
                   <MenuItem key="profile" onClick={handleProfile}>
                     Profile
+                  </MenuItem>,
+                  <MenuItem key="settings" onClick={() => { handleClose(); navigate.push("/settings"); }}>
+                    Settings
                   </MenuItem>,
                   <Divider key="divider-1" />,
                   <MenuItem key="signout" onClick={handleSignOut}>
@@ -138,6 +265,27 @@ export default function Header() {
           </Menu>
         </Box>
       </Toolbar>
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        ModalProps={{
+          keepMounted: true, // Better open performance on mobile.
+        }}
+        sx={{
+          display: { xs: "block", md: "none" },
+          "& .MuiDrawer-paper": {
+            boxSizing: "border-box",
+            width: 280,
+            bgcolor: "transparent",
+            boxShadow: "none",
+          },
+        }}
+      >
+        <Sidebar
+          sx={{ width: "100%", height: "100%", top: 0, borderRadius: 0 }}
+        />
+      </Drawer>
     </AppBar>
   );
 }

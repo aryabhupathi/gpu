@@ -1,8 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useTransition, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { createForum } from "@/redux/slices/forumSlice";
+import { createForum } from "@/actions/forumActions";
 import {
   Container,
   Typography,
@@ -10,51 +9,220 @@ import {
   Button,
   Box,
   Stack,
+  Paper,
+  Chip,
+  FormControlLabel,
+  Switch
 } from "@mui/material";
+import dynamic from "next/dynamic";
+import "react-quill-new/dist/quill.snow.css";
+import imageCompression from 'browser-image-compression';
+
+import { UploadDropzone } from "@/lib/uploadthing";
+
+// Dynamically import react-quill-new to avoid SSR issues
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
+
 export default function CreateForumPage() {
-  const dispatch = useDispatch();
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState("");
+  const [mediaUrl, setMediaUrl] = useState<string | null>(null);
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
   const handleSubmit = async () => {
-    const success = await dispatch(
-      createForum({ title, description, tags: tags.split(",") }) as any
-    );
-    if (success) router.push("/");
+    if (!title.trim() || !description.trim()) return;
+    
+    startTransition(async () => {
+      try {
+        await createForum({ 
+          title, 
+          description, 
+          mediaUrl,
+          isPrivate,
+          tags: tags.split(",").map(t => t.trim()).filter(Boolean) 
+        });
+        router.push("/");
+      } catch (e) {
+        console.error("Failed to create forum", e);
+      }
+    });
   };
+
+  const quillModules = useMemo(() => ({
+    toolbar: [
+      [{ 'header': [1, 2, false] }],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+      [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+      ['link', 'code-block'],
+      ['clean']
+    ],
+  }), []);
+
   return (
-    <Container maxWidth="sm">
-      <Box mt={5}>
-        <Typography variant="h5" gutterBottom textAlign="center">
-          Create New Forum
+    <Container maxWidth="md" sx={{ py: 6 }}>
+      <Paper elevation={0} sx={{ p: { xs: 3, md: 5 }, borderRadius: 4, bgcolor: "#fff", border: "1px solid #E5E7EB" }}>
+        <Typography variant="h4" fontWeight={800} gutterBottom sx={{ mb: 4, color: "#1F2937" }}>
+          Start a New Discussion
         </Typography>
-        <Stack spacing={2}>
-          <TextField
-            label="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="Description"
-            value={description}
-            multiline
-            minRows={4}
-            onChange={(e) => setDescription(e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="Tags (comma-separated)"
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            fullWidth
-          />
-          <Button onClick={handleSubmit} variant="contained" color="primary">
-            Create Forum
-          </Button>
+        
+        <Stack spacing={4}>
+          <Box>
+            <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, color: "#4B5563" }}>
+              Title
+            </Typography>
+            <TextField
+              placeholder="What do you want to talk about?"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              fullWidth
+              disabled={isPending}
+              variant="outlined"
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+            />
+          </Box>
+
+          <Box>
+            <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, color: "#4B5563" }}>
+              Body
+            </Typography>
+            <Box sx={{ 
+              ".ql-container": { minHeight: "250px", borderBottomLeftRadius: 8, borderBottomRightRadius: 8, fontSize: "1rem", fontFamily: "inherit" },
+              ".ql-toolbar": { borderTopLeftRadius: 8, borderTopRightRadius: 8, bgcolor: "#F9FAFB" }
+            }}>
+              <ReactQuill 
+                theme="snow"
+                value={description} 
+                onChange={setDescription} 
+                modules={quillModules}
+                readOnly={isPending}
+                placeholder="Share your thoughts, add code snippets, or drop a link..."
+              />
+            </Box>
+          </Box>
+
+          <Box>
+            <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, color: "#4B5563" }}>
+              Tags
+            </Typography>
+            <TextField
+              placeholder="e.g. React, Next.js, Help"
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              fullWidth
+              disabled={isPending}
+              variant="outlined"
+              helperText="Separate tags with commas"
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+            />
+          </Box>
+
+          <Box>
+            <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, color: "#4B5563" }}>
+              Attach Media (Optional)
+            </Typography>
+            {mediaUrl ? (
+              <Box sx={{ position: "relative", width: "fit-content" }}>
+                {mediaUrl.endsWith(".mp4") ? (
+                   <video src={mediaUrl} controls autoPlay loop muted playsInline style={{ maxWidth: "100%", maxHeight: "300px", borderRadius: 8 }} />
+                ) : (
+                   <img src={mediaUrl} alt="Uploaded media" style={{ maxWidth: "100%", maxHeight: "300px", borderRadius: 8 }} />
+                )}
+                <Button 
+                  color="error" 
+                  variant="contained" 
+                  size="small" 
+                  sx={{ position: "absolute", top: 8, right: 8 }}
+                  onClick={() => setMediaUrl(null)}
+                >
+                  Remove
+                </Button>
+              </Box>
+            ) : (
+              <Box sx={{ border: "1px dashed #D1D5DB", borderRadius: 2, bgcolor: "#F9FAFB", p: 2 }}>
+                <UploadDropzone
+                  endpoint="imageUploader"
+                  onBeforeUploadBegin={async (files) => {
+                    const compressedFiles = await Promise.all(
+                      files.map(async (file) => {
+                        if (file.type.startsWith("image/")) {
+                          const options = {
+                            maxSizeMB: 1, // Maximum 1MB
+                            maxWidthOrHeight: 1920,
+                            useWebWorker: true,
+                          };
+                          try {
+                            const compressedBlob = await imageCompression(file, options);
+                            return new File([compressedBlob], file.name, {
+                              type: compressedBlob.type,
+                            });
+                          } catch (error) {
+                            console.error("Compression error:", error);
+                            return file;
+                          }
+                        }
+                        return file;
+                      })
+                    );
+                    return compressedFiles;
+                  }}
+                  onClientUploadComplete={(res) => {
+                    if (res?.[0]) setMediaUrl(res[0].url);
+                  }}
+                  onUploadError={(error: Error) => {
+                    alert(`ERROR! ${error.message}`);
+                  }}
+                />
+              </Box>
+            )}
+          </Box>
+
+          <Box>
+            <FormControlLabel
+              control={
+                <Switch 
+                  checked={isPrivate} 
+                  onChange={(e) => setIsPrivate(e.target.checked)} 
+                  color="primary"
+                  disabled={isPending}
+                />
+              }
+              label={
+                <Box>
+                  <Typography variant="subtitle2" fontWeight={600} color="#4B5563">
+                    Followers-Only (Private)
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Only you and your followers will be able to see this post.
+                  </Typography>
+                </Box>
+              }
+            />
+          </Box>
+
+          <Box sx={{ display: "flex", justifyContent: "flex-end", pt: 2 }}>
+            <Button 
+              onClick={() => router.back()} 
+              variant="text" 
+              sx={{ mr: 2, color: "#6B7280" }}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSubmit} 
+              variant="contained" 
+              color="primary" 
+              disabled={isPending || !title.trim() || !description.trim()}
+              sx={{ px: 4, py: 1.5, borderRadius: 2, fontWeight: "bold" }}
+            >
+              {isPending ? "Posting..." : "Post Discussion"}
+            </Button>
+          </Box>
         </Stack>
-      </Box>
+      </Paper>
     </Container>
   );
 }

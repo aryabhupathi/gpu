@@ -1,220 +1,120 @@
-"use client";
-import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import {
-  CircularProgress,
-  Typography,
-  Container,
-  Box,
-  IconButton,
-  TextField,
-  Button,
-  List,
-  Card, CardContent,CardHeader,
-  Paper,
-} from "@mui/material";
-import { ThumbUp } from "@mui/icons-material";
-import { fetchForumById, toggleForumLike } from "@/redux/slices/forumSlice";
-import {
-  fetchCommentsByForumId,
-  addComment,
-  toggleCommentLike,
-} from "@/redux/slices/commentSlice";
-import { RootState } from "@/redux/store";
-export default function ForumDetailPage() {
-  const { id } = useParams();
-  const dispatch = useDispatch();
-  const {
-    selectedForum,
-    loading: forumLoading,
-    error: forumError,
-  } = useSelector((state: RootState) => state.forum);
-  const { user } = useSelector((state: RootState) => state.auth);
-  const {
-    comments,
-    loading: commentsLoading,
-    error: commentsError,
-  } = useSelector((state: RootState) => state.comment);
-  const [newComment, setNewComment] = useState("");
-  const [showComments, setShowComments] = useState(false);
-  useEffect(() => {
-    if (id) {
-      dispatch(fetchForumById(id as string));
-      dispatch(fetchCommentsByForumId(id as string));
-    }
-  }, [dispatch, id]);
-  const handleLikeToggle = () => {
-    if (!selectedForum) return;
-    dispatch(toggleForumLike(selectedForum.id));
-  };
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newComment.trim()) {
-      dispatch(addComment({ forumId: id as string, content: newComment }));
-      setNewComment("");
+import prisma from "@/lib/prisma";
+import ForumDetailClient from "./ForumDetailClient";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { notFound } from "next/navigation";
+
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const forum = await prisma.forum.findUnique({
+    where: { id },
+    include: { user: { select: { name: true } } }
+  });
+
+  if (!forum || forum.isPrivate) {
+    return { title: "Post Not Found | letstalk" };
+  }
+
+  // Strip HTML tags for description
+  const cleanDescription = forum.description.replace(/<[^>]+>/g, '').substring(0, 160) + "...";
+
+  return {
+    title: `${forum.title} | letstalk`,
+    description: cleanDescription,
+    openGraph: {
+      title: forum.title,
+      description: cleanDescription,
+      type: "article",
+      authors: [forum.user.name || "Anonymous"],
+      images: forum.mediaUrl ? [forum.mediaUrl] : []
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: forum.title,
+      description: cleanDescription,
+      images: forum.mediaUrl ? [forum.mediaUrl] : []
     }
   };
-  const handleShowComments = () => {
-    setShowComments(!showComments);
-  };
-  if (forumLoading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+}
+
+export default async function ForumDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const session = await getServerSession(authOptions);
+  const userEmail = session?.user?.email;
+
+  const forum = await prisma.forum.findUnique({
+    where: { id },
+    include: {
+      user: true,
+      comments: {
+        include: {
+          user: true,
+          likes: true,
+        },
+        orderBy: { createdAt: "desc" },
+      },
+      likes: true,
+    },
+  });
+
+  if (!forum) return notFound();
+
+  let currentUser = null;
+  if (userEmail) {
+    currentUser = await prisma.user.findUnique({ 
+      where: { email: userEmail },
+      select: { id: true, email: true, name: true, role: true }
+    });
   }
-  if (forumError || !selectedForum) {
-    return (
-      <Typography align="center" color="error" sx={{ mt: 4 }}>
-        Error loading forum
-      </Typography>
-    );
+
+  // Privacy Check
+  if (forum.isPrivate) {
+    if (!currentUser) return notFound();
+    if (currentUser.id !== forum.userId && currentUser.role !== "ADMIN") {
+      const isFollowing = await prisma.follow.findUnique({
+        where: {
+          followerId_followingId: {
+            followerId: currentUser.id,
+            followingId: forum.userId
+          }
+        }
+      });
+      if (!isFollowing) {
+        return (
+          <div style={{ textAlign: "center", padding: "100px 20px" }}>
+            <h1>This post is private.</h1>
+            <p>You must follow the author to view this post.</p>
+          </div>
+        );
+      }
+    }
   }
+
+  const userLikedForum = currentUser ? forum.likes.some(like => like.userId === currentUser.id) : false;
+  
+  let userBookmarkedForum = false;
+  if (currentUser) {
+    const bm = await prisma.bookmark.findUnique({
+      where: {
+        userId_forumId: { userId: currentUser.id, forumId: forum.id }
+      }
+    });
+    userBookmarkedForum = !!bm;
+  }
+
+  const commentsWithLikes = forum.comments.map(comment => ({
+    ...comment,
+    userLiked: currentUser ? comment.likes.some(like => like.userId === currentUser.id) : false,
+    _count: { likes: comment.likes.length }
+  }));
+
   return (
-    <Container maxWidth="md">
-      <Box sx={{ my: 5 }}>
-        <Paper elevation={3} sx={{ p: { xs: 2, sm: 4 } }}>
-          <Typography variant="h4" fontWeight="bold" gutterBottom>
-            {selectedForum.title}
-          </Typography>
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ mb: 2, whiteSpace: "pre-wrap" }}
-          >
-            {selectedForum.description}
-          </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              justifyContent: "space-between",
-              alignItems: { sm: "center" },
-              gap: 1,
-              flexWrap: "wrap",
-              mt: 2,
-              mb: 3,
-            }}
-          >
-            <Typography variant="caption" color="text.disabled">
-              Posted on {new Date(selectedForum.createdAt).toLocaleString()}
-            </Typography>
-            <Typography variant="caption" color="text.disabled">
-              By: {selectedForum.user?.name || "Unknown"}
-            </Typography>
-          </Box>
-          {user ? (
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <IconButton
-                color={selectedForum.userLiked ? "primary" : "default"}
-                onClick={handleLikeToggle}
-                aria-label="like-forum"
-                disabled={selectedForum.user.email === user.email}
-              >
-                <ThumbUp />
-              </IconButton>
-              <Typography variant="body2" sx={{ ml: 1 }}>
-                {selectedForum._count?.likes ?? 0} Likes
-              </Typography>
-            </Box>
-          ) : (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Log in to like this post.
-            </Typography>
-          )}
-        </Paper>
-        {/* Comment Section */}
-        <Box sx={{ mt: 6 }}>
-          <Typography variant="h5" fontWeight="bold" gutterBottom>
-            Comments ({comments.length})
-          </Typography>
-          <Button onClick={handleShowComments}>
-            {showComments ? "Hide comments" : "Show all comments"}
-          </Button>
-          {user ? (
-            <Box component="form" onSubmit={handleCommentSubmit} sx={{ mb: 3 }}>
-              <TextField
-                label="Add a comment"
-                fullWidth
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                required
-                multiline
-                rows={3}
-                sx={{ mb: 2 }}
-              />
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={commentsLoading}
-              >
-                Post Comment
-              </Button>
-            </Box>
-          ) : (
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Log in to post a comment.
-            </Typography>
-          )}
-          {commentsLoading && (
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-              <CircularProgress />
-            </Box>
-          )}
-          {commentsError && (
-            <Typography color="error" sx={{ mb: 2 }}>
-              {commentsError}
-            </Typography>
-          )}
-          {showComments && (
-            <List disablePadding>
-              {comments.map((comment) => (
-                <Card key={comment.id} elevation={1} sx={{ mb: 2 }}>
-                  <CardHeader
-                    title={comment.content}
-                    subheader={
-                      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                        <Typography variant="caption" color="text.secondary">
-                          Commented on{" "}
-                          {new Date(comment.createdAt).toLocaleString()}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontStyle: "italic" }}>
-                          By: {comment.user?.name || "Anonymous"}
-                        </Typography>
-                      </Box>
-                    }
-                    sx={{ padding: 2 }}
-                  />
-                  <CardContent>
-                    {user && (
-                      <Box sx={{ mt: 1, display: "flex", alignItems: "center" }}>
-                        <IconButton
-                          color={comment.userLiked ? "primary" : "default"}
-                          onClick={() => dispatch(toggleCommentLike(comment.id))}
-                          aria-label="like-comment"
-                          size="small"
-                        >
-                          <ThumbUp fontSize="small" />
-                        </IconButton>
-                        <Typography variant="caption" sx={{ ml: 1 }} color="text.secondary">
-                          {comment._count?.likes ?? 0} Likes
-                        </Typography>
-                      </Box>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-              {!comments.length && !commentsLoading && (
-                <Typography variant="body2" color="text.secondary">
-                  No comments yet. Be the first to share your thoughts!
-                </Typography>
-              )}
-            </List>
-          )}
-        </Box>
-      </Box>
-    </Container>
+    <ForumDetailClient 
+      forum={{ ...forum, _count: { likes: forum.likes.length }, userLiked: userLikedForum, userBookmarked: userBookmarkedForum }} 
+      initialComments={commentsWithLikes} 
+      user={currentUser} 
+    />
   );
 }
