@@ -3,6 +3,8 @@ import { Container, Typography, Box, Paper, Avatar, List, ListItem, ListItemAvat
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default async function LeaderboardPage() {
   const topUsers = await prisma.user.findMany({
     orderBy: { xp: "desc" },
