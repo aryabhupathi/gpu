@@ -6,7 +6,6 @@ import { Box, Typography, List, ListItem, ListItemButton, ListItemIcon, ListItem
 import HomeIcon from "@mui/icons-material/Home";
 import ExploreIcon from "@mui/icons-material/Explore";
 import ForumIcon from "@mui/icons-material/Forum";
-import SettingsIcon from "@mui/icons-material/Settings";
 import CodeIcon from "@mui/icons-material/Code";
 import PaletteIcon from "@mui/icons-material/Palette";
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
