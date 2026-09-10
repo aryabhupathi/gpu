@@ -14,14 +14,9 @@ import {
   FormControlLabel,
   Switch
 } from "@mui/material";
-import dynamic from "next/dynamic";
-import "react-quill-new/dist/quill.snow.css";
+import RichTextEditor from "@/components/common/RichTextEditor";
 import imageCompression from 'browser-image-compression';
-
 import { UploadDropzone } from "@/lib/uploadthing";
-
-// Dynamically import react-quill-new to avoid SSR issues
-const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
 export default function CreateForumPage() {
   const router = useRouter();
@@ -51,16 +46,6 @@ export default function CreateForumPage() {
     });
   };
 
-  const quillModules = useMemo(() => ({
-    toolbar: [
-      [{ 'header': [1, 2, false] }],
-      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-      [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-      ['link', 'code-block'],
-      ['clean']
-    ],
-  }), []);
-
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Paper elevation={0} sx={{ p: { xs: 3, md: 5 }, borderRadius: 4, bgcolor: "#fff", border: "1px solid #E5E7EB" }}>
@@ -88,19 +73,12 @@ export default function CreateForumPage() {
             <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, color: "#4B5563" }}>
               Body
             </Typography>
-            <Box sx={{ 
-              ".ql-container": { minHeight: "250px", borderBottomLeftRadius: 8, borderBottomRightRadius: 8, fontSize: "1rem", fontFamily: "inherit" },
-              ".ql-toolbar": { borderTopLeftRadius: 8, borderTopRightRadius: 8, bgcolor: "#F9FAFB" }
-            }}>
-              <ReactQuill 
-                theme="snow"
-                value={description} 
-                onChange={setDescription} 
-                modules={quillModules}
-                readOnly={isPending}
-                placeholder="Share your thoughts, add code snippets, or drop a link..."
-              />
-            </Box>
+            <RichTextEditor 
+              value={description}
+              onChange={setDescription}
+              readOnly={isPending}
+              placeholder="Share your thoughts, add code snippets, or drop a link..."
+            />
           </Box>
 
           <Box>

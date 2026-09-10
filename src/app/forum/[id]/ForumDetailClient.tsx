@@ -256,12 +256,16 @@ export default function ForumDetailClient({
             </Typography>
 
             <Box
-              className="ql-editor"
+              className="ProseMirror"
               sx={{
                 mb: 4,
                 "& img": { maxWidth: "100%", height: "auto", borderRadius: 2 },
                 "& p": { margin: "0 0 1em", lineHeight: 1.8, color: "#334155" },
                 "& h1, & h2, & h3": { margin: "1em 0 0.5em", color: "#0F172A" },
+                "& ul, & ol": { paddingLeft: "1.5rem", mb: 2 },
+                "& a": { color: "#3B82F6", textDecoration: "underline" },
+                "& code": { bgcolor: "#F1F5F9", p: 0.5, borderRadius: 1, fontFamily: "monospace" },
+                "& pre": { bgcolor: "#0F172A", color: "#F8FAFC", p: 2, borderRadius: 2, fontFamily: "monospace", overflowX: "auto" }
               }}
             >
               {parse(forumData.description, {
