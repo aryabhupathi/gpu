@@ -14,9 +14,11 @@ import {
   CardHeader,
   Paper,
   Avatar,
+  Snackbar,
+  Alert
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { ThumbUp, BookmarkBorder, Bookmark } from "@mui/icons-material";
+import { ThumbUp, BookmarkBorder, Bookmark, Share as ShareIcon } from "@mui/icons-material";
 import { toggleForumLike, archiveForum, deleteForum } from "@/actions/forumActions";
 import { toggleBookmark } from "@/actions/bookmarkActions";
 import { addComment, toggleCommentLike } from "@/actions/commentActions";
@@ -122,6 +124,24 @@ export default function ForumDetailClient({
 
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: forumData.title,
+          url: url,
+        });
+      } catch (err) {
+        console.error('Error sharing', err);
+      }
+    } else {
+      navigator.clipboard.writeText(url);
+      setSnackbarOpen(true);
+    }
+  };
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -394,11 +414,27 @@ export default function ForumDetailClient({
                       {forumData.userBookmarked ? <Bookmark /> : <BookmarkBorder />}
                     </IconButton>
                   </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <IconButton
+                      onClick={handleShare}
+                      sx={{ color: "text.secondary" }}
+                    >
+                      <ShareIcon />
+                    </IconButton>
+                  </motion.div>
                 </Box>
               ) : (
-                <Typography variant="body2" color="text.secondary">
-                  Log in to like this post.
-                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Log in to like this post.
+                  </Typography>
+                  <IconButton onClick={handleShare} sx={{ color: "text.secondary" }}>
+                    <ShareIcon />
+                  </IconButton>
+                </Box>
               )}
             </Box>
           </Paper>
@@ -629,6 +665,17 @@ export default function ForumDetailClient({
           )}
         </Box>
       </Box>
+      {/* Share Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
+          Link copied to clipboard!
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
