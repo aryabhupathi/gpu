@@ -1,33 +1,44 @@
 import { MetadataRoute } from 'next'
 import prisma from '@/lib/prisma'
 
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'http://localhost:3000' // In production, this would be process.env.NEXT_PUBLIC_BASE_URL or similar
+  const baseUrl = process.env.NEXTAUTH_URL || 'https://letstalk-community.vercel.app';
 
-  // Fetch all public forums
-  const forums = await prisma.forum.findMany({
-    where: { isPrivate: false },
-    select: { id: true, updatedAt: true },
-  })
+  let forumUrls: MetadataRoute.Sitemap = [];
+  let userUrls: MetadataRoute.Sitemap = [];
 
-  const forumUrls = forums.map((forum) => ({
-    url: `${baseUrl}/forum/${forum.id}`,
-    lastModified: forum.updatedAt,
-    changeFrequency: 'daily' as const,
-    priority: 0.8,
-  }))
+  try {
+    // Fetch all public forums
+    const forums = await prisma.forum.findMany({
+      where: { isPrivate: false },
+      select: { id: true, updatedAt: true },
+    })
 
-  // Fetch all users
-  const users = await prisma.user.findMany({
-    select: { id: true, updatedAt: true },
-  })
+    forumUrls = forums.map((forum) => ({
+      url: `${baseUrl}/forum/${forum.id}`,
+      lastModified: forum.updatedAt,
+      changeFrequency: 'daily' as const,
+      priority: 0.8,
+    }))
 
-  const userUrls = users.map((user) => ({
-    url: `${baseUrl}/u/${user.id}`,
-    lastModified: user.updatedAt,
-    changeFrequency: 'weekly' as const,
-    priority: 0.6,
-  }))
+    // Fetch all users
+    const users = await prisma.user.findMany({
+      select: { id: true, updatedAt: true },
+    })
+
+    userUrls = users.map((user) => ({
+      url: `${baseUrl}/u/${user.id}`,
+      lastModified: user.updatedAt,
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    }))
+  } catch (e) {
+    console.error("Sitemap DB connection skipped during build");
+  }
+
+
 
   return [
     {

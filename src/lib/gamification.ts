@@ -16,7 +16,7 @@ export async function checkAndAwardBadges(userId: string) {
   if (!user) return;
 
   const currentBadges = user.badges ? user.badges.split(",") : [];
-  let newBadges = [...currentBadges];
+  const newBadges = [...currentBadges];
   let awarded = false;
 
   for (const rule of BADGE_RULES) {
@@ -33,4 +33,19 @@ export async function checkAndAwardBadges(userId: string) {
       data: { badges: newBadges.join(",") }
     });
   }
+}
+
+export function calculateLevel(xp: number): number {
+  return Math.floor(Math.sqrt(Math.max(0, xp) / 10)) + 1;
+}
+
+export function getXpForNextLevel(level: number): number {
+  return Math.pow(level, 2) * 10;
+}
+
+export function getLevelName(level: number): string {
+  if (level >= 20) return "Legend";
+  if (level >= 10) return "Veteran";
+  if (level >= 5) return "Regular";
+  return "Novice";
 }
