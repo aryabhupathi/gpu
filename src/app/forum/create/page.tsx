@@ -15,6 +15,7 @@ import {
   Switch
 } from "@mui/material";
 import RichTextEditor from "@/components/common/RichTextEditor";
+import AudioRecorder from "@/components/common/AudioRecorder";
 import imageCompression from 'browser-image-compression';
 import { UploadDropzone } from "@/lib/uploadthing";
 
@@ -99,7 +100,14 @@ export default function CreateForumPage() {
 
           <Box>
             <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, color: "#4B5563" }}>
-              Attach Media (Optional)
+              Voice Note (Optional)
+            </Typography>
+            <AudioRecorder onAudioUpload={(url) => setMediaUrl(url)} />
+          </Box>
+
+          <Box>
+            <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, color: "#4B5563" }}>
+              Attach Media (Image/Video) (Optional)
             </Typography>
             {mediaUrl ? (
               <Box sx={{ position: "relative", width: "fit-content" }}>

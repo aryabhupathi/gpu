@@ -304,7 +304,9 @@ export default function ForumDetailClient({
 
             {forumData.mediaUrl && (
               <Box sx={{ mb: 4, width: "100%", display: "flex", justifyContent: "center" }}>
-                {forumData.mediaUrl.endsWith(".mp4") ? (
+                {forumData.mediaUrl.endsWith(".webm") || forumData.mediaUrl.endsWith(".mp3") ? (
+                  <audio src={forumData.mediaUrl} controls style={{ width: "100%", maxWidth: "500px" }} />
+                ) : forumData.mediaUrl.endsWith(".mp4") ? (
                   <video src={forumData.mediaUrl} controls autoPlay loop muted playsInline style={{ maxWidth: "100%", maxHeight: "500px", borderRadius: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }} />
                 ) : (
                   <img src={forumData.mediaUrl} alt="Forum Media" style={{ maxWidth: "100%", maxHeight: "500px", borderRadius: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }} />

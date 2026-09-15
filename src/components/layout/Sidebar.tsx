@@ -58,7 +58,7 @@ export default function Sidebar({ sx }: SidebarProps) {
         ...sx
       }}
     >
-      <Box sx={{ p: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <Box sx={{ p: 3, display: { xs: "flex", md: "none" }, justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="h6" fontWeight="bold" sx={{ color: "#fff", display: "flex", alignItems: "center", gap: 1 }}>
           letstalk
         </Typography>

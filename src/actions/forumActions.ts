@@ -10,6 +10,7 @@ export async function createForum(data: { title: string; description: string; ta
   if (!session?.user?.email) throw new Error("Unauthorized");
 
   const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+  console.log(user, ":userrr");
   if (!user) throw new Error("User not found");
 
   const forum = await prisma.forum.create({

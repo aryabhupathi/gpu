@@ -22,7 +22,7 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const signInSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
+  identifier: z.string().min(1, "Please enter a valid email or mobile number"),
   password: z.string().min(1, "Password is required"),
 });
 
@@ -48,7 +48,7 @@ export default function SignInPage() {
       try {
         const result = await signIn("credentials", {
           redirect: false,
-          email: data.email,
+          identifier: data.identifier,
           password: data.password,
         });
 
@@ -86,11 +86,11 @@ export default function SignInPage() {
         )}
         <Stack spacing={2} sx={{ width: "100%" }}>
           <TextField
-            label="Email"
-            type="email"
-            {...register("email")}
-            error={!!errors.email}
-            helperText={errors.email?.message}
+            label="Email or Mobile Number"
+            type="text"
+            {...register("identifier")}
+            error={!!errors.identifier}
+            helperText={errors.identifier?.message}
             fullWidth
             required
             disabled={isPending}

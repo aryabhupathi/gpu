@@ -19,7 +19,7 @@ import {
 
 const signUpSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  email: z.string().email("Please enter a valid email address"),
+  identifier: z.string().min(1, "Please enter a valid email or mobile number"),
   password: z.string().min(1, "Password is required"),
 });
 
@@ -94,11 +94,11 @@ export default function SignUpPage() {
             InputLabelProps={{ shrink: true }}
           />
           <TextField
-            label="Email"
-            type="email"
-            {...register("email")}
-            error={!!errors.email}
-            helperText={errors.email?.message}
+            label="Email or Mobile Number"
+            type="text"
+            {...register("identifier")}
+            error={!!errors.identifier}
+            helperText={errors.identifier?.message}
             fullWidth
             required
             disabled={isPending || success}

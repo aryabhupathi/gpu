@@ -19,16 +19,20 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        identifier: { label: "Email or Mobile", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.identifier || !credentials?.password) {
           return null;
         }
         
-        let user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+        const isEmail = credentials.identifier.includes("@");
+        
+        let user = await prisma.user.findFirst({
+          where: isEmail 
+            ? { email: credentials.identifier } 
+            : { phone: credentials.identifier },
         });
 
         // Simple bypass: if they use the dummy email, auto-create if missing
