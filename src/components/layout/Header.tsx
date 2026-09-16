@@ -26,6 +26,9 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { Drawer } from "@mui/material";
 import Sidebar from "./Sidebar";
 import NotificationBell from "./NotificationBell";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import { useAppTheme } from "@/app/ThemeProviderClient";
 export default function Header() {
   const { data: session } = useSession();
   const navigate = useRouter();
@@ -37,6 +40,9 @@ export default function Header() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const open = Boolean(anchorEl);
+
+  const { mode, toggleTheme } = useAppTheme();
+
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -58,19 +64,22 @@ export default function Header() {
     navigate.push("/");
   };
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<{forums: any[], users: any[]}>({forums: [], users: []});
+  const [searchResults, setSearchResults] = useState<{
+    forums: any[];
+    users: any[];
+  }>({ forums: [], users: [] });
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
     if (searchQuery.length < 2) {
-      setSearchResults({forums: [], users: []});
+      setSearchResults({ forums: [], users: [] });
       setShowDropdown(false);
       return;
     }
     const delayDebounceFn = setTimeout(() => {
       fetch(`/api/search?q=${searchQuery}`)
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           setSearchResults(data);
           setShowDropdown(true);
         })
@@ -112,6 +121,7 @@ export default function Header() {
           >
             <MenuIcon />
           </IconButton>
+          <Image src="/logos.png" />
           <Typography
             variant="h6"
             component={Link}
@@ -132,57 +142,159 @@ export default function Header() {
         </Box>
 
         {/* Search Bar */}
-        <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', mx: 2, position: 'relative' }}>
-          <Box sx={{ position: 'relative', width: { xs: '100%', md: '400px' } }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: '#F1F5F9', borderRadius: 4, px: 2, py: 0.5 }}>
-              <SearchIcon sx={{ color: '#94A3B8', mr: 1 }} />
-              <input 
-                type="text" 
-                placeholder="Search posts, users..." 
+        <Box
+          sx={{
+            flexGrow: 1,
+            display: "flex",
+            justifyContent: "center",
+            mx: 2,
+            position: "relative",
+          }}
+        >
+          <Box
+            sx={{ position: "relative", width: { xs: "100%", md: "400px" } }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                bgcolor: "action.hover",
+                borderRadius: 4,
+                px: 2,
+                py: 0.5,
+              }}
+            >
+              <SearchIcon sx={{ color: "text.secondary", mr: 1 }} />
+              <Box
+                component="input"
+                type="text"
+                placeholder="Search posts, users..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSearchQuery(e.target.value)
+                }
                 onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                onFocus={() => { if (searchQuery.length >= 2) setShowDropdown(true); }}
-                style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', padding: '8px 0', fontSize: '1rem', color: '#334155' }}
+                onFocus={() => {
+                  if (searchQuery.length >= 2) setShowDropdown(true);
+                }}
+                sx={{
+                  border: "none",
+                  background: "transparent",
+                  outline: "none",
+                  width: "100%",
+                  padding: "8px 0",
+                  fontSize: "1rem",
+                  color: "text.primary",
+                }}
               />
             </Box>
 
             {/* Dropdown Results */}
-            {showDropdown && (searchResults.forums.length > 0 || searchResults.users.length > 0) && (
-              <Paper 
-                elevation={4} 
-                sx={{ 
-                  position: 'absolute', top: '100%', left: 0, right: 0, mt: 1, 
-                  borderRadius: 3, border: '1px solid #E2E8F0', overflow: 'hidden', zIndex: 9999 
-                }}
-              >
-                {searchResults.users.length > 0 && (
-                  <Box>
-                    <Typography variant="overline" sx={{ px: 2, py: 1, display: 'block', bgcolor: '#F8FAFC', color: '#64748B' }}>Users</Typography>
-                    {searchResults.users.map(u => (
-                      <MenuItem key={u.id} onClick={() => navigate.push(`/u/${u.id}`)} sx={{ py: 1.5 }}>
-                        <Avatar src={u.image || ""} sx={{ width: 24, height: 24, mr: 1, fontSize: '0.8rem' }}>{u.name?.charAt(0)}</Avatar>
-                        <Typography variant="body2">{u.name}</Typography>
-                      </MenuItem>
-                    ))}
-                  </Box>
-                )}
-                {searchResults.forums.length > 0 && (
-                  <Box>
-                    <Typography variant="overline" sx={{ px: 2, py: 1, display: 'block', bgcolor: '#F8FAFC', color: '#64748B' }}>Posts</Typography>
-                    {searchResults.forums.map(f => (
-                      <MenuItem key={f.id} onClick={() => navigate.push(`/forum/${f.id}`)} sx={{ py: 1.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                        <Typography variant="body2" fontWeight={600} noWrap sx={{ width: '100%' }}>{f.title}</Typography>
-                      </MenuItem>
-                    ))}
-                  </Box>
-                )}
-              </Paper>
-            )}
+            {showDropdown &&
+              (searchResults.forums.length > 0 ||
+                searchResults.users.length > 0) && (
+                <Paper
+                  elevation={4}
+                  sx={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    right: 0,
+                    mt: 1,
+                    borderRadius: 3,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    overflow: "hidden",
+                    zIndex: 9999,
+                  }}
+                >
+                  {searchResults.users.length > 0 && (
+                    <Box>
+                      <Typography
+                        variant="overline"
+                        sx={{
+                          px: 2,
+                          py: 1,
+                          display: "block",
+                          bgcolor: "action.hover",
+                          color: "text.secondary",
+                        }}
+                      >
+                        Users
+                      </Typography>
+                      {searchResults.users.map((u) => (
+                        <MenuItem
+                          key={u.id}
+                          onClick={() => navigate.push(`/u/${u.id}`)}
+                          sx={{ py: 1.5 }}
+                        >
+                          <Avatar
+                            src={u.image || ""}
+                            sx={{
+                              width: 24,
+                              height: 24,
+                              mr: 1,
+                              fontSize: "0.8rem",
+                            }}
+                          >
+                            {u.name?.charAt(0)}
+                          </Avatar>
+                          <Typography variant="body2" color="text.primary">
+                            {u.name}
+                          </Typography>
+                        </MenuItem>
+                      ))}
+                    </Box>
+                  )}
+                  {searchResults.forums.length > 0 && (
+                    <Box>
+                      <Typography
+                        variant="overline"
+                        sx={{
+                          px: 2,
+                          py: 1,
+                          display: "block",
+                          bgcolor: "action.hover",
+                          color: "text.secondary",
+                        }}
+                      >
+                        Posts
+                      </Typography>
+                      {searchResults.forums.map((f) => (
+                        <MenuItem
+                          key={f.id}
+                          onClick={() => navigate.push(`/forum/${f.id}`)}
+                          sx={{
+                            py: 1.5,
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "flex-start",
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            fontWeight={600}
+                            noWrap
+                            sx={{ width: "100%", color: "text.primary" }}
+                          >
+                            {f.title}
+                          </Typography>
+                        </MenuItem>
+                      ))}
+                    </Box>
+                  )}
+                </Paper>
+              )}
           </Box>
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center" }}>
+          <IconButton
+            onClick={toggleTheme}
+            sx={{ mr: 1, color: "text.secondary" }}
+          >
+            {mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
+          </IconButton>
           {session ? (
             <>
               <NotificationBell />
@@ -198,9 +310,10 @@ export default function Header() {
                   sx={{
                     width: 36,
                     height: 36,
-                    background: "linear-gradient(135deg, #7C3AED 0%, #3B82F6 100%)",
+                    background:
+                      "linear-gradient(135deg, #7C3AED 0%, #3B82F6 100%)",
                     fontWeight: 700,
-                    fontSize: "1rem"
+                    fontSize: "1rem",
                   }}
                 >
                   {session.user?.name?.charAt(0) || "U"}
@@ -246,7 +359,13 @@ export default function Header() {
                   <MenuItem key="profile" onClick={handleProfile}>
                     Profile
                   </MenuItem>,
-                  <MenuItem key="settings" onClick={() => { handleClose(); navigate.push("/settings"); }}>
+                  <MenuItem
+                    key="settings"
+                    onClick={() => {
+                      handleClose();
+                      navigate.push("/settings");
+                    }}
+                  >
                     Settings
                   </MenuItem>,
                   <Divider key="divider-1" />,

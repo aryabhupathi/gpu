@@ -1,25 +1,25 @@
 import { createTheme } from '@mui/material/styles';
 
-const theme = createTheme({
+export const getTheme = (mode: 'light' | 'dark') => createTheme({
   palette: {
-    mode: 'light',
+    mode,
     primary: {
-      main: '#7C3AED', // Vibrant purple
+      main: '#7C3AED',
       light: '#A78BFA',
       dark: '#5B21B6',
     },
     secondary: {
-      main: '#06B6D4', // Vibrant cyan
+      main: '#06B6D4',
       light: '#67E8F9',
       dark: '#0891B2',
     },
     background: {
-      default: '#F3F4F6', // Light gray for the outer background
-      paper: '#FFFFFF',
+      default: mode === 'light' ? '#F3F4F6' : '#0F172A',
+      paper: mode === 'light' ? '#FFFFFF' : '#1E293B',
     },
     text: {
-      primary: '#1F2937',
-      secondary: '#4B5563',
+      primary: mode === 'light' ? '#1F2937' : '#F8FAFC',
+      secondary: mode === 'light' ? '#4B5563' : '#94A3B8',
     },
   },
   typography: {
@@ -56,20 +56,27 @@ const theme = createTheme({
         root: {
           borderRadius: 16,
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-          border: '1px solid #E5E7EB',
+          border: mode === 'light' ? '1px solid #E5E7EB' : '1px solid #334155',
+          background: mode === 'light' ? '#FFFFFF' : '#1E293B',
         },
       },
     },
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: '#FFFFFF',
-          color: '#1F2937',
+          backgroundColor: mode === 'light' ? '#FFFFFF' : '#1E293B',
+          color: mode === 'light' ? '#1F2937' : '#F8FAFC',
           boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
         },
       },
     },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundColor: mode === 'light' ? '#FFFFFF' : '#1E293B',
+          backgroundImage: 'none',
+        }
+      }
+    }
   },
 });
-
-export default theme;

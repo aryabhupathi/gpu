@@ -75,13 +75,22 @@ export default function MessagesClient({ currentUser, mutuals }: { currentUser: 
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, height: '80vh' }}>
-      <Paper elevation={0} sx={{ display: 'flex', height: '100%', borderRadius: 4, border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+    <Container maxWidth="lg" sx={{ mt: { xs: 0, md: 4 }, p: { xs: 0, md: 2 }, height: { xs: 'calc(100vh - 64px)', md: '80vh' } }}>
+      <Paper elevation={0} sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, height: '100%', borderRadius: { xs: 0, md: 4 }, border: { md: '1px solid' }, borderColor: 'divider', overflow: 'hidden' }}>
         
         {/* Sidebar */}
-        <Box sx={{ width: 300, borderRight: '1px solid #E2E8F0', bgcolor: '#F8FAFC', display: 'flex', flexDirection: 'column' }}>
-          <Box sx={{ p: 2, borderBottom: '1px solid #E2E8F0', bgcolor: '#fff' }}>
-            <Typography variant="h6" fontWeight={800}>Messages</Typography>
+        <Box sx={{ 
+          width: { xs: '100%', md: 300 }, 
+          borderRight: { md: '1px solid' }, 
+          borderBottom: { xs: '1px solid', md: 'none' }, 
+          borderColor: 'divider', 
+          bgcolor: 'background.default', 
+          display: { xs: activeUser ? 'none' : 'flex', md: 'flex' }, 
+          flexDirection: 'column',
+          height: { xs: '100%', md: 'auto' }
+        }}>
+          <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+            <Typography variant="h6" fontWeight={800} color="text.primary">Messages</Typography>
           </Box>
           <List sx={{ flexGrow: 1, overflowY: 'auto' }}>
             <Typography variant="overline" sx={{ px: 2, color: 'text.secondary' }}>Mutuals</Typography>
@@ -90,12 +99,12 @@ export default function MessagesClient({ currentUser, mutuals }: { currentUser: 
                 key={`m-${user.id}`} 
                 component="div"
                 onClick={() => { setActiveUser(user); setActiveConvoId(null); }}
-                sx={{ cursor: 'pointer', bgcolor: activeUser?.id === user.id ? 'rgba(59, 130, 246, 0.1)' : 'transparent' }}
+                sx={{ cursor: 'pointer', bgcolor: activeUser?.id === user.id ? 'action.selected' : 'transparent' }}
               >
                 <ListItemAvatar>
                   <Avatar src={user.image || ""}>{user.name?.charAt(0) || "U"}</Avatar>
                 </ListItemAvatar>
-                <ListItemText primary={user.name || "Anonymous"} />
+                <ListItemText primary={user.name || "Anonymous"} primaryTypographyProps={{ color: "text.primary" }} />
               </ListItem>
             ))}
             
@@ -106,7 +115,7 @@ export default function MessagesClient({ currentUser, mutuals }: { currentUser: 
                 key={convo.id} 
                 component="div"
                 onClick={() => { setActiveUser(convo.otherUser); setActiveConvoId(convo.id); }}
-                sx={{ cursor: 'pointer', bgcolor: activeConvoId === convo.id ? 'rgba(59, 130, 246, 0.1)' : 'transparent' }}
+                sx={{ cursor: 'pointer', bgcolor: activeConvoId === convo.id ? 'action.selected' : 'transparent' }}
               >
                 <ListItemAvatar>
                   <Avatar src={convo.otherUser.image || ""}>{convo.otherUser.name?.charAt(0) || "U"}</Avatar>
@@ -114,7 +123,8 @@ export default function MessagesClient({ currentUser, mutuals }: { currentUser: 
                 <ListItemText 
                   primary={convo.otherUser.name || "Anonymous"} 
                   secondary={convo.lastMessage?.content || "Say hi!"} 
-                  secondaryTypographyProps={{ noWrap: true }}
+                  primaryTypographyProps={{ color: "text.primary" }}
+                  secondaryTypographyProps={{ noWrap: true, color: "text.secondary" }}
                 />
               </ListItem>
             ))}
@@ -122,12 +132,24 @@ export default function MessagesClient({ currentUser, mutuals }: { currentUser: 
         </Box>
 
         {/* Chat Area */}
-        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', bgcolor: '#fff' }}>
+        <Box sx={{ 
+          flexGrow: 1, 
+          display: { xs: activeUser ? 'flex' : 'none', md: 'flex' }, 
+          flexDirection: 'column', 
+          bgcolor: 'background.paper',
+          height: { xs: '100%', md: 'auto' }
+        }}>
           {activeUser ? (
             <>
-              <Box sx={{ p: 2, borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 2 }}>
+                <IconButton 
+                  onClick={() => setActiveUser(null)} 
+                  sx={{ display: { md: 'none' }, color: 'text.primary' }}
+                >
+                  <span style={{ fontSize: '1.2rem' }}>←</span>
+                </IconButton>
                 <Avatar src={activeUser.image || ""}>{activeUser.name?.charAt(0) || "U"}</Avatar>
-                <Typography variant="h6" fontWeight={700}>{activeUser.name || "Anonymous"}</Typography>
+                <Typography variant="h6" fontWeight={700} color="text.primary">{activeUser.name || "Anonymous"}</Typography>
               </Box>
               
               <Box sx={{ flexGrow: 1, overflowY: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -139,8 +161,8 @@ export default function MessagesClient({ currentUser, mutuals }: { currentUser: 
                         maxWidth: '70%', 
                         p: 2, 
                         borderRadius: 3, 
-                        bgcolor: isMe ? '#3B82F6' : '#F1F5F9',
-                        color: isMe ? '#fff' : '#0F172A',
+                        bgcolor: isMe ? 'primary.main' : 'action.hover',
+                        color: isMe ? '#fff' : 'text.primary',
                         borderBottomRightRadius: isMe ? 4 : 12,
                         borderBottomLeftRadius: !isMe ? 4 : 12
                       }}>
@@ -152,16 +174,16 @@ export default function MessagesClient({ currentUser, mutuals }: { currentUser: 
                 <div ref={messagesEndRef} />
               </Box>
 
-              <Box component="form" onSubmit={handleSend} sx={{ p: 2, borderTop: '1px solid #E2E8F0', display: 'flex', gap: 1, bgcolor: '#F8FAFC' }}>
+              <Box component="form" onSubmit={handleSend} sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex', gap: 1, bgcolor: 'background.default' }}>
                 <TextField
                   fullWidth
                   placeholder="Type a message..."
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   size="small"
-                  sx={{ bgcolor: '#fff', '& .MuiOutlinedInput-root': { borderRadius: 4 } }}
+                  sx={{ bgcolor: 'background.paper', '& .MuiOutlinedInput-root': { borderRadius: 4 } }}
                 />
-                <IconButton type="submit" color="primary" disabled={!inputText.trim()} sx={{ bgcolor: '#3B82F6', color: '#fff', '&:hover': { bgcolor: '#2563EB' } }}>
+                <IconButton type="submit" disabled={!inputText.trim()} sx={{ bgcolor: 'primary.main', color: '#fff', '&:hover': { bgcolor: 'primary.dark' } }}>
                   <Send />
                 </IconButton>
               </Box>

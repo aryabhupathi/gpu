@@ -59,7 +59,7 @@ export default function SearchFilter({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         sx={{
-          bgcolor: "#fff",
+          bgcolor: "background.paper",
           "& .MuiOutlinedInput-root": {
             borderRadius: 3,
           }
@@ -74,7 +74,7 @@ export default function SearchFilter({
       />
       
       {showSort && (
-        <FormControl sx={{ minWidth: 200, bgcolor: '#fff', borderRadius: 3 }}>
+        <FormControl sx={{ minWidth: 200, bgcolor: 'background.paper', borderRadius: 3 }}>
           <Select
             value={sort}
             onChange={handleSortChange}

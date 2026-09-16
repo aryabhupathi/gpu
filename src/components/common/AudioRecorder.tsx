@@ -3,7 +3,7 @@
 import React, { useState, useRef } from "react";
 import { Box, IconButton, Typography, CircularProgress } from "@mui/material";
 import { Mic, Stop, PlayArrow, Delete } from "@mui/icons-material";
-import { UploadDropzone } from "@/lib/uploadthing";
+
 
 interface AudioRecorderProps {
   onAudioUpload: (url: string) => void;

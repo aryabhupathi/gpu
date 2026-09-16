@@ -6,10 +6,10 @@ import MessagesClient from "./MessagesClient";
 
 export default async function MessagesPage() {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) redirect("/auth/signin");
+  if (!session?.user?.id) redirect("/auth/signin");
 
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { id: session.user.id },
     include: {
       following: { include: { following: { select: { id: true, name: true, image: true } } } },
       followers: { include: { follower: { select: { id: true, name: true, image: true } } } }

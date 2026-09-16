@@ -54,6 +54,9 @@ export default function Sidebar({ sx }: SidebarProps) {
         height: "100%", // full available height inside the flex container
         overflowY: "auto",
         overflowX: "hidden",
+        "&::-webkit-scrollbar": { display: "none" },
+        msOverflowStyle: "none",
+        scrollbarWidth: "none",
         pb: 2,
         ...sx
       }}
@@ -117,21 +120,21 @@ export default function Sidebar({ sx }: SidebarProps) {
 
       <List sx={{ px: 2, flexGrow: 1, gap: 1, display: "flex", flexDirection: "column" }}>
         <ListItem disablePadding>
-          <ListItemButton component={Link} href="/spaces/tech-hub" sx={{ borderRadius: 2, py: 1.5, ...getActiveStyle("/spaces/tech-hub") }}>
+          <ListItemButton component={Link} href="/forum?q=Tech" sx={{ borderRadius: 2, py: 1.5, ...getActiveStyle("/forum?q=Tech") }}>
             <ListItemIcon sx={getIconStyle("linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)")}><CodeIcon fontSize="small" /></ListItemIcon>
-            <ListItemText primary="Tech Hub" slotProps={{ primary: { fontWeight: pathname === "/spaces/tech-hub" ? 700 : 500 } }} />
+            <ListItemText primary="Tech Hub" slotProps={{ primary: { fontWeight: pathname === "/forum?q=Tech" ? 700 : 500 } }} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton component={Link} href="/spaces/creative-lab" sx={{ borderRadius: 2, py: 1.5, ...getActiveStyle("/spaces/creative-lab") }}>
+          <ListItemButton component={Link} href="/forum?q=Movies" sx={{ borderRadius: 2, py: 1.5, ...getActiveStyle("/forum?q=Movies") }}>
             <ListItemIcon sx={getIconStyle("linear-gradient(135deg, #F43F5E 0%, #E11D48 100%)")}><PaletteIcon fontSize="small" /></ListItemIcon>
-            <ListItemText primary="Creative Lab" slotProps={{ primary: { fontWeight: pathname === "/spaces/creative-lab" ? 700 : 500 } }} />
+            <ListItemText primary="Movies & Art" slotProps={{ primary: { fontWeight: pathname === "/forum?q=Movies" ? 700 : 500 } }} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton component={Link} href="/spaces/gaming" sx={{ borderRadius: 2, py: 1.5, ...getActiveStyle("/spaces/gaming") }}>
+          <ListItemButton component={Link} href="/forum?q=Cricket" sx={{ borderRadius: 2, py: 1.5, ...getActiveStyle("/forum?q=Cricket") }}>
             <ListItemIcon sx={getIconStyle("linear-gradient(135deg, #F59E0B 0%, #D97706 100%)")}><SportsEsportsIcon fontSize="small" /></ListItemIcon>
-            <ListItemText primary="Gaming" slotProps={{ primary: { fontWeight: pathname === "/spaces/gaming" ? 700 : 500 } }} />
+            <ListItemText primary="Sports & Games" slotProps={{ primary: { fontWeight: pathname === "/forum?q=Cricket" ? 700 : 500 } }} />
           </ListItemButton>
         </ListItem>
       </List>

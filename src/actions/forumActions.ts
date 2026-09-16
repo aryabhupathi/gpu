@@ -5,12 +5,90 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
+export async function getForumsPaginated(
+  cursor?: string, 
+  limit: number = 10,
+  q?: string,
+  sort: string = "latest"
+) {
+  const session = await getServerSession(authOptions);
+  let currentUser = null;
+  if (session?.user?.id) {
+    currentUser = await prisma.user.findUnique({ where: { id: session.user.id } });
+  }
+
+  const forums = await prisma.forum.findMany({
+    take: limit + 1, // Fetch one extra to check if there are more
+    ...(cursor && {
+      skip: 1,
+      cursor: {
+        id: cursor,
+      },
+    }),
+    where: {
+      archived: false,
+      AND: [
+        {
+          ...(q ? {
+            OR: [
+              { title: { contains: q } },
+              { description: { contains: q } },
+              { tags: { some: { tag: { name: { contains: q } } } } }
+            ]
+          } : {})
+        },
+        {
+          OR: [
+            { isPrivate: false },
+            ...(currentUser ? [
+              { userId: currentUser.id },
+              { user: { followers: { some: { followerId: currentUser.id } } } }
+            ] : [])
+          ]
+        }
+      ]
+    },
+    orderBy: sort === "popular" 
+      ? { likes: { _count: "desc" } } 
+      : sort === "oldest" ? { createdAt: "asc" } : { createdAt: "desc" },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      tags: {
+        include: {
+          tag: true,
+        },
+      },
+      _count: {
+        select: { likes: true, comments: true },
+      },
+    },
+  });
+
+  let nextCursor: typeof cursor | undefined = undefined;
+  if (forums.length > limit) {
+    const nextItem = forums.pop(); // Remove the extra item
+    nextCursor = nextItem?.id;
+  }
+
+  const formattedForums = forums.map((forum) => ({
+    ...forum,
+    createdAt: forum.createdAt.toISOString(),
+    tags: forum.tags.map((ft) => ft.tag.name),
+  }));
+
+  return { forums: formattedForums, nextCursor };
+}
+
 export async function createForum(data: { title: string; description: string; tags: string[], mediaUrl?: string | null, isPrivate?: boolean }) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
 
-  const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-  console.log(user, ":userrr");
+  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
   if (!user) throw new Error("User not found");
 
   const forum = await prisma.forum.create({

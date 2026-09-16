@@ -86,7 +86,7 @@ export default function ForumCard({ forum }: ForumCardProps) {
           <Typography
             variant="h6"
             fontWeight="800"
-            sx={{ lineHeight: 1.3, flexGrow: 1, color: "#0F172A" }}
+            sx={{ lineHeight: 1.3, flexGrow: 1, color: "text.primary" }}
           >
             {forum.title}
           </Typography>
@@ -114,7 +114,8 @@ export default function ForumCard({ forum }: ForumCardProps) {
             justifyContent: "space-between",
             mt: "auto",
             pt: 2,
-            borderTop: "1px solid #F1F5F9",
+            borderTop: "1px solid",
+            borderColor: "divider",
           }}
         >
           <Box 
@@ -138,7 +139,7 @@ export default function ForumCard({ forum }: ForumCardProps) {
             <Box>
               <Typography
                 variant="subtitle2"
-                sx={{ fontWeight: 700, lineHeight: 1.2, color: "#1E293B" }}
+                sx={{ fontWeight: 700, lineHeight: 1.2, color: "text.primary" }}
               >
                 {forum.user?.name || "Unknown User"}
               </Typography>
