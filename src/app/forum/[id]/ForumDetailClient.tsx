@@ -18,6 +18,7 @@ import {
   Alert
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { ThumbUp, BookmarkBorder, Bookmark, Share as ShareIcon } from "@mui/icons-material";
 import { toggleForumLike, archiveForum, deleteForum } from "@/actions/forumActions";
 import { toggleBookmark } from "@/actions/bookmarkActions";
@@ -116,7 +117,7 @@ export default function ForumDetailClient({
       try {
         const { bookmarked } = await toggleBookmark(forumData.id);
         setForumData((prev) => ({ ...prev, userBookmarked: bookmarked }));
-      } catch (err) {
+      } catch {
         setForumData((prev) => ({ ...prev, userBookmarked: wasBookmarked }));
       }
     });
@@ -309,7 +310,7 @@ export default function ForumDetailClient({
                 ) : forumData.mediaUrl.endsWith(".mp4") ? (
                   <video src={forumData.mediaUrl} controls autoPlay loop muted playsInline style={{ maxWidth: "100%", maxHeight: "500px", borderRadius: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }} />
                 ) : (
-                  <img src={forumData.mediaUrl} alt="Forum Media" style={{ maxWidth: "100%", maxHeight: "500px", borderRadius: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }} />
+                  <Image src={forumData.mediaUrl} alt="Forum Media" width={800} height={500} style={{ maxWidth: "100%", height: "auto", maxHeight: "500px", borderRadius: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.1)", objectFit: "contain" }} />
                 )}
               </Box>
             )}

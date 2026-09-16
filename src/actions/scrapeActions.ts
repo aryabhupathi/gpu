@@ -13,7 +13,7 @@ export async function fetchLinkPreview(url: string) {
     const image = $('meta[property="og:image"]').attr('content') || "";
 
     return { title, description, image, url };
-  } catch (error) {
+  } catch {
     return null;
   }
 }

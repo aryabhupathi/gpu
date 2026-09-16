@@ -1,5 +1,5 @@
 "use client";
-import { useState, useTransition, useMemo } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createForum } from "@/actions/forumActions";
 import {
@@ -10,10 +10,10 @@ import {
   Box,
   Stack,
   Paper,
-  Chip,
   FormControlLabel,
   Switch
 } from "@mui/material";
+import Image from "next/image";
 import RichTextEditor from "@/components/common/RichTextEditor";
 import AudioRecorder from "@/components/common/AudioRecorder";
 import imageCompression from 'browser-image-compression';
@@ -114,7 +114,7 @@ export default function CreateForumPage() {
                 {mediaUrl.endsWith(".mp4") ? (
                    <video src={mediaUrl} controls autoPlay loop muted playsInline style={{ maxWidth: "100%", maxHeight: "300px", borderRadius: 8 }} />
                 ) : (
-                   <img src={mediaUrl} alt="Uploaded media" style={{ maxWidth: "100%", maxHeight: "300px", borderRadius: 8 }} />
+                   <Image src={mediaUrl} alt="Uploaded media" width={500} height={300} style={{ maxWidth: "100%", height: "auto", maxHeight: "300px", borderRadius: 8, objectFit: 'contain' }} />
                 )}
                 <Button 
                   color="error" 

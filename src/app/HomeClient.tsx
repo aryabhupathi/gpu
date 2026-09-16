@@ -124,7 +124,7 @@ export default function HomeClient({
             select
             size="small"
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
+            onChange={(e) => setSortBy(e.target.value as "latest" | "trending" | "discussed")}
             SelectProps={{ native: true }}
             sx={{
               minWidth: 150,

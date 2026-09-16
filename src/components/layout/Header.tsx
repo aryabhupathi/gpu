@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import {
   AppBar,
   Toolbar,
@@ -10,12 +11,9 @@ import {
   Menu,
   MenuItem,
   Divider,
-  Tooltip,
   Paper,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import GroupIcon from "@mui/icons-material/Group";
-import ChatIcon from "@mui/icons-material/Chat";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -29,6 +27,23 @@ import NotificationBell from "./NotificationBell";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import { useAppTheme } from "@/app/ThemeProviderClient";
+
+interface SearchUser {
+  id: string;
+  name: string | null;
+  image: string | null;
+}
+
+interface SearchForum {
+  id: string;
+  title: string;
+}
+
+interface SearchResults {
+  forums: SearchForum[];
+  users: SearchUser[];
+}
+
 export default function Header() {
   const { data: session } = useSession();
   const navigate = useRouter();
@@ -64,10 +79,7 @@ export default function Header() {
     navigate.push("/");
   };
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<{
-    forums: any[];
-    users: any[];
-  }>({ forums: [], users: [] });
+  const [searchResults, setSearchResults] = useState<SearchResults>({ forums: [], users: [] });
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
@@ -121,7 +133,7 @@ export default function Header() {
           >
             <MenuIcon />
           </IconButton>
-          <Image src="/logos.png" />
+          <Image src="/logos.png" alt="Company Logo" width={200} height={100} />
           <Typography
             variant="h6"
             component={Link}

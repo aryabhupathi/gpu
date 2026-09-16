@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, Container, Grid, Paper, Divider } from "@mui/material";
+import { Typography, Container, Grid, Paper } from "@mui/material";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
@@ -24,7 +24,7 @@ export default async function AdminDashboard() {
         Admin Dashboard
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Welcome, {session.user.name}. Here's an overview of the platform.
+        Welcome, {session.user.name}. Here&apos;s an overview of the platform.
       </Typography>
       
       <Grid container spacing={4}>
