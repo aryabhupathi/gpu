@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import PublicProfileClient from "./PublicProfileClient";
 import { Metadata } from "next";
-export async function generateMetadata({ params }: { params: { userId: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ userId: string }> }): Promise<Metadata> {
   const { userId } = await params;
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: { params: { userId: string } 
     },
   };
 }
-export default async function PublicProfilePage({ params }: { params: { userId: string } }) {
+export default async function PublicProfilePage({ params }: { params: Promise<{ userId: string }> }) {
   const { userId } = await params;
   const user = await prisma.user.findUnique({
     where: { id: userId },
