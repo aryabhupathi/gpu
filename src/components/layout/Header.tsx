@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import {
   AppBar,
   Toolbar,
@@ -17,6 +16,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser, clearUser } from "@/redux/slices/authSlice";
 import { RootState } from "@/redux/store";
@@ -112,8 +112,8 @@ export default function Header() {
     <AppBar
       position="sticky"
       sx={{
-        bgcolor: "#FFFFFF",
-        color: "#1F2937",
+        bgcolor: "background.paper",
+        color: "text.primary",
         boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
       }}
     >
@@ -128,24 +128,33 @@ export default function Header() {
           >
             <MenuIcon />
           </IconButton>
-          <Image src="/logos.png" alt="Company Logo" width={200} height={100} />
-          <Typography
-            variant="h6"
+          <Box
             component={Link}
             href="/"
-            sx={{
-              textDecoration: "none",
-              color: "transparent",
-              fontWeight: 800,
-              backgroundClip: "text",
-              backgroundImage:
-                "linear-gradient(90deg, #7C3AED 0%, #3B82F6 100%)",
-              letterSpacing: "-0.05em",
-              fontSize: "1.5rem",
-            }}
+            sx={{ display: "flex", alignItems: "center", textDecoration: "none", gap: { xs: 1, sm: 1.5 } }}
           >
-            letstalk
-          </Typography>
+            <Box
+              component="img"
+              src="/logo-modern.png"
+              alt="logo"
+              sx={{ width: { xs: 32, sm: 48 }, height: { xs: 32, sm: 48 }, objectFit: "contain" }}
+            />
+            <Typography
+              variant="h6"
+              sx={{
+                display: { xs: "none", sm: "block" },
+                color: "transparent",
+                fontWeight: 800,
+                backgroundClip: "text",
+                backgroundImage:
+                  "linear-gradient(90deg, #7C3AED 0%, #3B82F6 100%)",
+                letterSpacing: "-0.05em",
+                fontSize: { sm: "1.25rem", md: "1.5rem" },
+              }}
+            >
+              letstalk
+            </Typography>
+          </Box>
         </Box>
         <Box
           sx={{
