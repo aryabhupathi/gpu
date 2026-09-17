@@ -18,7 +18,6 @@ import RichTextEditor from "@/components/common/RichTextEditor";
 import AudioRecorder from "@/components/common/AudioRecorder";
 import imageCompression from 'browser-image-compression';
 import { UploadDropzone } from "@/lib/uploadthing";
-
 export default function CreateForumPage() {
   const router = useRouter();
   const [title, setTitle] = useState("");
@@ -27,18 +26,19 @@ export default function CreateForumPage() {
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [isPrivate, setIsPrivate] = useState(false);
   const [isPending, startTransition] = useTransition();
-
   const handleSubmit = async () => {
     if (!title.trim() || !description.trim()) return;
-    
     startTransition(async () => {
       try {
-        await createForum({ 
-          title, 
-          description, 
+        await createForum({
+          title,
+          description,
           mediaUrl,
           isPrivate,
-          tags: tags.split(",").map(t => t.trim()).filter(Boolean) 
+          tags: tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean),
         });
         router.push("/");
       } catch (e) {
@@ -46,17 +46,32 @@ export default function CreateForumPage() {
       }
     });
   };
-
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
-      <Paper elevation={0} sx={{ p: { xs: 3, md: 5 }, borderRadius: 4, bgcolor: "#fff", border: "1px solid #E5E7EB" }}>
-        <Typography variant="h4" fontWeight={800} gutterBottom sx={{ mb: 4, color: "#1F2937" }}>
+      <Paper
+        elevation={0}
+        sx={{
+          p: { xs: 3, md: 5 },
+          borderRadius: 4,
+          bgcolor: "#fff",
+          border: "1px solid #E5E7EB",
+        }}
+      >
+        <Typography
+          variant="h4"
+          fontWeight={800}
+          gutterBottom
+          sx={{ mb: 4, color: "#1F2937" }}
+        >
           Start a New Discussion
         </Typography>
-        
         <Stack spacing={4}>
           <Box>
-            <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, color: "#4B5563" }}>
+            <Typography
+              variant="subtitle2"
+              fontWeight={600}
+              sx={{ mb: 1, color: "#4B5563" }}
+            >
               Title
             </Typography>
             <TextField
@@ -69,21 +84,27 @@ export default function CreateForumPage() {
               sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
             />
           </Box>
-
           <Box>
-            <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, color: "#4B5563" }}>
+            <Typography
+              variant="subtitle2"
+              fontWeight={600}
+              sx={{ mb: 1, color: "#4B5563" }}
+            >
               Body
             </Typography>
-            <RichTextEditor 
+            <RichTextEditor
               value={description}
               onChange={setDescription}
               readOnly={isPending}
               placeholder="Share your thoughts, add code snippets, or drop a link..."
             />
           </Box>
-
           <Box>
-            <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, color: "#4B5563" }}>
+            <Typography
+              variant="subtitle2"
+              fontWeight={600}
+              sx={{ mb: 1, color: "#4B5563" }}
+            >
               Tags
             </Typography>
             <TextField
@@ -97,29 +118,59 @@ export default function CreateForumPage() {
               sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
             />
           </Box>
-
           <Box>
-            <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, color: "#4B5563" }}>
+            <Typography
+              variant="subtitle2"
+              fontWeight={600}
+              sx={{ mb: 1, color: "#4B5563" }}
+            >
               Voice Note (Optional)
             </Typography>
             <AudioRecorder onAudioUpload={(url) => setMediaUrl(url)} />
           </Box>
-
           <Box>
-            <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, color: "#4B5563" }}>
+            <Typography
+              variant="subtitle2"
+              fontWeight={600}
+              sx={{ mb: 1, color: "#4B5563" }}
+            >
               Attach Media (Image/Video) (Optional)
             </Typography>
             {mediaUrl ? (
               <Box sx={{ position: "relative", width: "fit-content" }}>
                 {mediaUrl.endsWith(".mp4") ? (
-                   <video src={mediaUrl} controls autoPlay loop muted playsInline style={{ maxWidth: "100%", maxHeight: "300px", borderRadius: 8 }} />
+                  <video
+                    src={mediaUrl}
+                    controls
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "300px",
+                      borderRadius: 8,
+                    }}
+                  />
                 ) : (
-                   <Image src={mediaUrl} alt="Uploaded media" width={500} height={300} style={{ maxWidth: "100%", height: "auto", maxHeight: "300px", borderRadius: 8, objectFit: 'contain' }} />
+                  <Image
+                    src={mediaUrl}
+                    alt="Uploaded media"
+                    width={500}
+                    height={300}
+                    style={{
+                      maxWidth: "100%",
+                      height: "auto",
+                      maxHeight: "300px",
+                      borderRadius: 8,
+                      objectFit: "contain",
+                    }}
+                  />
                 )}
-                <Button 
-                  color="error" 
-                  variant="contained" 
-                  size="small" 
+                <Button
+                  color="error"
+                  variant="contained"
+                  size="small"
                   sx={{ position: "absolute", top: 8, right: 8 }}
                   onClick={() => setMediaUrl(null)}
                 >
@@ -127,7 +178,14 @@ export default function CreateForumPage() {
                 </Button>
               </Box>
             ) : (
-              <Box sx={{ border: "1px dashed #D1D5DB", borderRadius: 2, bgcolor: "#F9FAFB", p: 2 }}>
+              <Box
+                sx={{
+                  border: "1px dashed #D1D5DB",
+                  borderRadius: 2,
+                  bgcolor: "#F9FAFB",
+                  p: 2,
+                }}
+              >
                 <UploadDropzone
                   endpoint="imageUploader"
                   onBeforeUploadBegin={async (files) => {
@@ -135,12 +193,15 @@ export default function CreateForumPage() {
                       files.map(async (file) => {
                         if (file.type.startsWith("image/")) {
                           const options = {
-                            maxSizeMB: 1, // Maximum 1MB
+                            maxSizeMB: 1,
                             maxWidthOrHeight: 1920,
                             useWebWorker: true,
                           };
                           try {
-                            const compressedBlob = await imageCompression(file, options);
+                            const compressedBlob = await imageCompression(
+                              file,
+                              options,
+                            );
                             return new File([compressedBlob], file.name, {
                               type: compressedBlob.type,
                             });
@@ -150,7 +211,7 @@ export default function CreateForumPage() {
                           }
                         }
                         return file;
-                      })
+                      }),
                     );
                     return compressedFiles;
                   }}
@@ -164,20 +225,23 @@ export default function CreateForumPage() {
               </Box>
             )}
           </Box>
-
           <Box>
             <FormControlLabel
               control={
-                <Switch 
-                  checked={isPrivate} 
-                  onChange={(e) => setIsPrivate(e.target.checked)} 
+                <Switch
+                  checked={isPrivate}
+                  onChange={(e) => setIsPrivate(e.target.checked)}
                   color="primary"
                   disabled={isPending}
                 />
               }
               label={
                 <Box>
-                  <Typography variant="subtitle2" fontWeight={600} color="#4B5563">
+                  <Typography
+                    variant="subtitle2"
+                    fontWeight={600}
+                    color="#4B5563"
+                  >
                     Followers-Only (Private)
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
@@ -187,20 +251,19 @@ export default function CreateForumPage() {
               }
             />
           </Box>
-
           <Box sx={{ display: "flex", justifyContent: "flex-end", pt: 2 }}>
-            <Button 
-              onClick={() => router.back()} 
-              variant="text" 
+            <Button
+              onClick={() => router.back()}
+              variant="text"
               sx={{ mr: 2, color: "#6B7280" }}
               disabled={isPending}
             >
               Cancel
             </Button>
-            <Button 
-              onClick={handleSubmit} 
-              variant="contained" 
-              color="primary" 
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
+              color="primary"
               disabled={isPending || !title.trim() || !description.trim()}
               sx={{ px: 4, py: 1.5, borderRadius: 2, fontWeight: "bold" }}
             >

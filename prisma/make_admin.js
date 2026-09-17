@@ -1,16 +1,13 @@
-const { PrismaClient } = require("@prisma/client");
-const bcrypt = require("bcryptjs");
-
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
-
 async function main() {
   const password = await bcrypt.hash("Arya1234", 10);
-  
   const adminUser = await prisma.user.upsert({
     where: { email: "arya@arya.com" },
-    update: { 
+    update: {
       role: "ADMIN",
-      password: password
+      password: password,
     },
     create: {
       name: "Arya Admin",
@@ -19,13 +16,11 @@ async function main() {
       role: "ADMIN",
       level: 99,
       xp: 10000,
-      badges: "👑 Legend,🛡️ Admin"
+      badges: "👑 Legend,🛡️ Admin",
     },
   });
-
   console.log("Admin user secured:", adminUser.email);
 }
-
 main()
   .catch((e) => {
     console.error(e);

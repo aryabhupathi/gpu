@@ -2,7 +2,6 @@ import ForumCard from "@/components/forum/ForumCard";
 import { Typography, Container } from "@mui/material";
 import prisma from "@/lib/prisma";
 import SearchFilter from "@/components/common/SearchFilter";
-
 export default async function CreativeLabPage({
   searchParams,
 }: {
@@ -11,7 +10,6 @@ export default async function CreativeLabPage({
   const params = await searchParams;
   const q = typeof params?.q === 'string' ? params.q : "";
   const sort = typeof params?.sort === 'string' ? params.sort : "latest";
-
   const forums = await prisma.forum.findMany({
     where: {
       tags: {
@@ -37,13 +35,11 @@ export default async function CreativeLabPage({
       ? { likes: { _count: "desc" } } 
       : sort === "oldest" ? { createdAt: "asc" } : { createdAt: "desc" },
   });
-
   const formattedForums = forums.map((forum) => ({
     ...forum,
     createdAt: forum.createdAt.toISOString(),
     tags: forum.tags.map((ft) => ft.tag.name),
   }));
-
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
       <Typography variant="h4" gutterBottom>
@@ -52,9 +48,7 @@ export default async function CreativeLabPage({
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
         Share your artwork, designs, music, and creative projects.
       </Typography>
-
       <SearchFilter placeholder="Search creative forums..." />
-
       {formattedForums.length === 0 ? (
         <Typography>No forums found in Creative Lab.</Typography>
       ) : (

@@ -14,7 +14,6 @@ import Grid from "@mui/material/Grid";
 import { Search as SearchIcon, Add as AddIcon } from "@mui/icons-material";
 import ForumCard from "@/components/forum/ForumCard";
 import Link from "next/link";
-
 type ForumItem = {
   id: string;
   title: string;
@@ -24,7 +23,6 @@ type ForumItem = {
   tags: string[];
   _count: { likes: number; comments: number };
 };
-
 export default function HomeClient({
   initialForums,
   user,
@@ -39,12 +37,9 @@ export default function HomeClient({
   );
   const [page, setPage] = useState(1);
   const forumsPerPage = 12;
-
-  // Extract all unique tags
   const allTags = Array.from(
     new Set(initialForums.flatMap((f) => f.tags)),
   ).slice(0, 10);
-
   let filteredForums = initialForums.filter((forum: ForumItem) => {
     const matchesSearch =
       forum.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -52,20 +47,16 @@ export default function HomeClient({
     const matchesTag = activeTag ? forum.tags.includes(activeTag) : true;
     return matchesSearch && matchesTag;
   });
-
-  // Apply Sorting
   filteredForums = filteredForums.sort((a, b) => {
     if (sortBy === "trending") return b._count.likes - a._count.likes;
     if (sortBy === "discussed") return b._count.comments - a._count.comments;
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
-
   const totalPages = Math.ceil(filteredForums.length / forumsPerPage);
   const paginatedForums = filteredForums.slice(
     (page - 1) * forumsPerPage,
     page * forumsPerPage,
   );
-
   return (
     <Container maxWidth="lg">
       <Box sx={{ mb: 4 }}>
@@ -81,7 +72,6 @@ export default function HomeClient({
           <Typography variant="h5" component="h1" sx={{ fontWeight: 800 }}>
             Explore Discussions
           </Typography>
-
           {!!user && (
             <Link href="/forum/create" passHref>
               <Button
@@ -94,7 +84,6 @@ export default function HomeClient({
             </Link>
           )}
         </Box>
-
         <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
           <TextField
             placeholder="Search topics, people..."
@@ -124,7 +113,9 @@ export default function HomeClient({
             select
             size="small"
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as "latest" | "trending" | "discussed")}
+            onChange={(e) =>
+              setSortBy(e.target.value as "latest" | "trending" | "discussed")
+            }
             SelectProps={{ native: true }}
             sx={{
               minWidth: 150,
@@ -139,7 +130,6 @@ export default function HomeClient({
             <option value="discussed">Most Discussed</option>
           </TextField>
         </Box>
-
         {allTags.length > 0 && (
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 3 }}>
             <Typography
@@ -181,7 +171,6 @@ export default function HomeClient({
           </Box>
         )}
       </Box>
-
       {filteredForums.length > 0 ? (
         <>
           <Grid container spacing={3}>

@@ -1,22 +1,15 @@
 import { PrismaClient } from "@prisma/client";
 import { hash as _hash } from "bcryptjs";
-
 const prisma = new PrismaClient();
-
 async function main() {
   console.log("Clearing old data (except original user)...");
-  // Clear data safely
   await prisma.commentLike.deleteMany();
   await prisma.forumLike.deleteMany();
   await prisma.comment.deleteMany();
   await prisma.forumTag.deleteMany();
   await prisma.forum.deleteMany();
   await prisma.tag.deleteMany();
-
-  // Create a default password hash
   const hash = await _hash("password123", 10);
-
-  // Users
   console.log("Creating users...");
   const users = [
     { email: "alex@example.com", name: "Alex Johnson", password: hash },
@@ -26,7 +19,6 @@ async function main() {
     { email: "michael@example.com", name: "Michael Brown", password: hash },
     { email: "sarah@example.com", name: "Sarah Davis", password: hash },
   ];
-
   const createdUsers = [];
   for (const user of users) {
     const created = await prisma.user.upsert({
@@ -36,8 +28,6 @@ async function main() {
     });
     createdUsers.push(created);
   }
-
-  // Also get Arya so Arya can like stuff
   let arya = await prisma.user.findUnique({
     where: { email: "arya@arya.com" },
   });
@@ -52,8 +42,6 @@ async function main() {
     });
   }
   createdUsers.push(arya);
-
-  // Tags
   console.log("Creating tags...");
   const tagNames = [
     "technology",
@@ -74,8 +62,6 @@ async function main() {
     });
     createdTags.push(tag);
   }
-
-  // Forums
   console.log("Creating forums...");
   const forumData = [
     {
@@ -129,13 +115,9 @@ async function main() {
       tags: ["career"],
     },
   ];
-
   const createdForums = [];
   for (const fd of forumData) {
-    // Pick a random user
     const user = createdUsers[Math.floor(Math.random() * createdUsers.length)];
-
-    // Create forum
     const forum = await prisma.forum.create({
       data: {
         title: fd.title,
@@ -153,11 +135,8 @@ async function main() {
     });
     createdForums.push(forum);
   }
-
-  // Comments & Likes
   console.log("Creating comments and likes...");
   for (const forum of createdForums) {
-    // Add 2-6 comments per forum
     const numComments = Math.floor(Math.random() * 5) + 2;
     for (let i = 0; i < numComments; i++) {
       const user =
@@ -169,8 +148,6 @@ async function main() {
           userId: user.id,
         },
       });
-
-      // Add likes to comments
       const numCommentLikes = Math.floor(Math.random() * 4); // 0-3 likes
       const likers = [...createdUsers]
         .sort(() => 0.5 - Math.random())
@@ -184,8 +161,6 @@ async function main() {
         });
       }
     }
-
-    // Add likes to forum
     const numForumLikes = Math.floor(Math.random() * createdUsers.length);
     const forumLikers = [...createdUsers]
       .sort(() => 0.5 - Math.random())
@@ -199,10 +174,8 @@ async function main() {
       });
     }
   }
-
   console.log("Seed completed successfully!");
 }
-
 main()
   .catch(console.error)
   .finally(() => prisma.$disconnect());

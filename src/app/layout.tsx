@@ -7,14 +7,11 @@ import Sidebar from "@/components/layout/Sidebar";
 import { Box } from "@mui/material";
 import ThemeProviderClient from "./ThemeProviderClient";
 import { cookies } from "next/headers";
-
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-
 export const metadata = {
   title: "letstalk",
   description: "A place to discuss and share ideas with the community",
 };
-
 export default async function RootLayout({
   children,
 }: {
@@ -25,7 +22,6 @@ export default async function RootLayout({
   const initialTheme = (themeCookie?.value === "dark" ? "dark" : "light") as
     | "light"
     | "dark";
-
   return (
     <html lang="en" className={`${inter.variable}`}>
       <body className={inter.className} style={{ margin: 0, padding: 0 }}>
@@ -42,7 +38,6 @@ export default async function RootLayout({
                 <Header />
                 <Box sx={{ display: "flex", flexGrow: 1, overflow: "hidden" }}>
                   <Sidebar sx={{ display: { xs: "none", md: "flex" } }} />
-
                   <Box
                     sx={{
                       flexGrow: 1,

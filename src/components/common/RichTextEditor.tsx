@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -16,31 +15,23 @@ import {
   FormatQuote,
   Link as LinkIcon,
 } from "@mui/icons-material";
-
-const MenuBar = ({ editor }: { editor: any }) => {
+import { Editor } from "@tiptap/react";
+const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) {
     return null;
   }
-
   const addLink = () => {
     const previousUrl = editor.getAttributes("link").href;
     const url = window.prompt("URL", previousUrl);
-
-    // cancelled
     if (url === null) {
       return;
     }
-
-    // empty
     if (url === "") {
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
       return;
     }
-
-    // update link
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
   };
-
   return (
     <Box
       sx={{
@@ -63,7 +54,6 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <FormatBold fontSize="small" />
         </IconButton>
       </Tooltip>
-
       <Tooltip title="Italic">
         <IconButton
           size="small"
@@ -73,7 +63,6 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <FormatItalic fontSize="small" />
         </IconButton>
       </Tooltip>
-
       <Tooltip title="Strikethrough">
         <IconButton
           size="small"
@@ -83,7 +72,6 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <FormatStrikethrough fontSize="small" />
         </IconButton>
       </Tooltip>
-
       <Tooltip title="Code">
         <IconButton
           size="small"
@@ -93,9 +81,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Code fontSize="small" />
         </IconButton>
       </Tooltip>
-
       <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-
       <Tooltip title="Bullet List">
         <IconButton
           size="small"
@@ -105,7 +91,6 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <FormatListBulleted fontSize="small" />
         </IconButton>
       </Tooltip>
-
       <Tooltip title="Numbered List">
         <IconButton
           size="small"
@@ -115,7 +100,6 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <FormatListNumbered fontSize="small" />
         </IconButton>
       </Tooltip>
-
       <Tooltip title="Blockquote">
         <IconButton
           size="small"
@@ -125,9 +109,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <FormatQuote fontSize="small" />
         </IconButton>
       </Tooltip>
-
       <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-
       <Tooltip title="Add Link">
         <IconButton
           size="small"
@@ -140,7 +122,6 @@ const MenuBar = ({ editor }: { editor: any }) => {
     </Box>
   );
 };
-
 export default function RichTextEditor({
   value,
   onChange,
@@ -168,13 +149,11 @@ export default function RichTextEditor({
       onChange(editor.getHTML());
     },
   });
-
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
-      editor.commands.setContent(value, false);
+      editor.commands.setContent(value, { emitUpdate: false });
     }
   }, [value, editor]);
-
   return (
     <Box
       sx={{
@@ -217,8 +196,8 @@ export default function RichTextEditor({
             borderRadius: 2,
             fontFamily: "monospace",
             overflowX: "auto",
-            "& code": { bgcolor: "transparent", color: "inherit", p: 0 }
-          }
+            "& code": { bgcolor: "transparent", color: "inherit", p: 0 },
+          },
         },
       }}
     >

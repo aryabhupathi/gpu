@@ -1,12 +1,9 @@
 "use client";
-
 import { Button } from "@mui/material";
 import { deleteForum } from "@/actions/forumActions";
 import { useTransition } from "react";
-
 export default function ProfileDeleteButton({ forumId }: { forumId: string }) {
   const [isPending, startTransition] = useTransition();
-
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this forum?")) {
       startTransition(async () => {
@@ -18,7 +15,6 @@ export default function ProfileDeleteButton({ forumId }: { forumId: string }) {
       });
     }
   };
-
   return (
     <Button
       variant="outlined"

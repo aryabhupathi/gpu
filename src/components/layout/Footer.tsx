@@ -1,7 +1,6 @@
 "use client"
 import React from "react";
 import { Box, Typography } from "@mui/material";
-
 const Footer = () => {
   return (
     <Box
@@ -9,11 +8,11 @@ const Footer = () => {
         width: "100%",
         backgroundColor: "#282c34",
         color: "#fff",
-        padding:"5px",
+        padding: "5px",
         textAlign: "center",
         position: "relative",
         bottom: 0,
-        marginTop:"10px"
+        marginTop: "10px",
       }}
     >
       <Typography variant="body2">
@@ -22,5 +21,4 @@ const Footer = () => {
     </Box>
   );
 };
-
 export default Footer;

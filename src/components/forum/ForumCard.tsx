@@ -1,18 +1,15 @@
-
 "use client";
-
 import React from "react";
 import { Card, Typography, Box, Avatar } from "@mui/material";
 import { useRouter } from "next/navigation";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-
 interface ForumCardProps {
   forum: {
     id: string;
     title: string;
     description: string;
-    createdAt: string;
+    createdAt: string | Date;
     isPrivate?: boolean;
     tags?: string[];
     user: {
@@ -25,17 +22,13 @@ interface ForumCardProps {
     };
   };
 }
-
 import { motion } from "framer-motion";
 import LockIcon from "@mui/icons-material/Lock";
-
 export default function ForumCard({ forum }: ForumCardProps) {
   const router = useRouter();
-
   const handleClick = () => {
     router.push(`/forum/${forum.id}`);
   };
-
   return (
     <motion.div whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }}>
       <Card
@@ -78,8 +71,7 @@ export default function ForumCard({ forum }: ForumCardProps) {
               </Typography>
             ))}
         </Box>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
           {forum.isPrivate && (
             <LockIcon sx={{ color: "text.secondary", fontSize: "1.2rem" }} />
           )}
@@ -91,7 +83,6 @@ export default function ForumCard({ forum }: ForumCardProps) {
             {forum.title}
           </Typography>
         </Box>
-
         <Typography
           variant="body2"
           color="text.secondary"
@@ -106,7 +97,6 @@ export default function ForumCard({ forum }: ForumCardProps) {
         >
           {forum.description.replace(/<[^>]+>/g, "")}
         </Typography>
-
         <Box
           sx={{
             display: "flex",
@@ -118,8 +108,14 @@ export default function ForumCard({ forum }: ForumCardProps) {
             borderColor: "divider",
           }}
         >
-          <Box 
-            sx={{ display: "flex", alignItems: "center", gap: 1.5, cursor: "pointer", "&:hover": { opacity: 0.8 } }}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              cursor: "pointer",
+              "&:hover": { opacity: 0.8 },
+            }}
             onClick={(e) => {
               e.stopPropagation();
               router.push(`/u/${forum.user.id}`);
@@ -151,7 +147,6 @@ export default function ForumCard({ forum }: ForumCardProps) {
               </Typography>
             </Box>
           </Box>
-
           <Box sx={{ display: "flex", gap: 1.5 }}>
             <Box
               sx={{
@@ -164,9 +159,9 @@ export default function ForumCard({ forum }: ForumCardProps) {
                 py: 0.5,
                 borderRadius: "16px",
                 transition: "all 0.2s ease",
-                "&:hover": { 
+                "&:hover": {
                   bgcolor: "rgba(59, 130, 246, 0.2)",
-                  transform: "translateY(-1px)"
+                  transform: "translateY(-1px)",
                 },
               }}
             >
@@ -186,9 +181,9 @@ export default function ForumCard({ forum }: ForumCardProps) {
                 py: 0.5,
                 borderRadius: "16px",
                 transition: "all 0.2s ease",
-                "&:hover": { 
+                "&:hover": {
                   bgcolor: "rgba(244, 63, 94, 0.2)",
-                  transform: "translateY(-1px)"
+                  transform: "translateY(-1px)",
                 },
               }}
             >

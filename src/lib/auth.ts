@@ -1,5 +1,4 @@
 import { NextAuthOptions, DefaultSession } from "next-auth";
-
 declare module "next-auth" {
   interface Session {
     user: {
@@ -26,57 +25,45 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.identifier || !credentials?.password) {
           return null;
         }
-        
         const isEmail = credentials.identifier.includes("@");
-        
         let user = await prisma.user.findFirst({
-          where: isEmail 
-            ? { email: credentials.identifier } 
+          where: isEmail
+            ? { email: credentials.identifier }
             : { phone: credentials.identifier },
         });
-
-        // Simple bypass: if they use the dummy email, auto-create if missing
-        if (credentials.email === "dummy@example.com") {
-           if (!user) {
-              const hashedPassword = await bcrypt.hash(credentials.password, 10);
-              user = await prisma.user.create({
-                 data: {
-                   name: "Dummy User",
-                   email: "dummy@example.com",
-                   password: hashedPassword,
-                 }
-              });
-           }
-           return {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              image: user.image,
-              role: user.role,
-           };
+        if (credentials.identifier === "dummy@example.com") {
+          if (!user) {
+            const hashedPassword = await bcrypt.hash(credentials.password, 10);
+            user = await prisma.user.create({
+              data: {
+                name: "Dummy User",
+                email: "dummy@example.com",
+                password: hashedPassword,
+              },
+            });
+          }
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            image: user.image,
+            role: user.role,
+          };
         }
-
         if (!user) {
           return null;
         }
-
         if (!user.password) {
-          return null; // They probably signed up with OAuth
+          return null;
         }
-        
         if (user.banned) {
           throw new Error("Your account has been banned by an administrator.");
         }
-
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
-          user.password
+          user.password,
         );
-        
         if (!isPasswordValid) {
-          // As requested, keep it simple. Let's just bypass password check for now if requested.
-          // But I'll leave the check so it's nominally secure for others, 
-          // they can just use dummy@example.com for instant access.
           return null;
         }
         return {

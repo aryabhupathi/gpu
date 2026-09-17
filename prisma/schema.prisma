@@ -10,7 +10,6 @@ enum Role {
   USER
   ADMIN
 }
-
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -27,7 +26,6 @@ model User {
   warnings      Int       @default(0)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  
   forums        Forum[]
   comments      Comment[]
   accounts      Account[]
@@ -35,27 +33,21 @@ model User {
   forumLikes    ForumLike[]
   commentLikes  CommentLike[]
   bookmarks     Bookmark[]
-  
   followers     Follow[] @relation("UserFollowers")
   following     Follow[] @relation("UserFollowing")
   notifications Notification[]
-
   conversations1 Conversation[] @relation("User1")
   conversations2 Conversation[] @relation("User2")
   messages       Message[]
 }
-
 model Follow {
   followerId  String
   followingId String
   createdAt   DateTime @default(now())
-
   follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
   following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
-
   @@id([followerId, followingId])
 }
-
 model Notification {
   id        String   @id @default(cuid())
   userId    String
@@ -66,44 +58,35 @@ model Notification {
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 }
-
 model Bookmark {
   id        String   @id @default(cuid())
   userId    String
   forumId   String
   createdAt DateTime @default(now())
-
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   forum Forum @relation(fields: [forumId], references: [id], onDelete: Cascade)
-
   @@unique([userId, forumId])
 }
-
 model Conversation {
   id        String   @id @default(cuid())
   user1Id   String
   user2Id   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   user1 User @relation("User1", fields: [user1Id], references: [id], onDelete: Cascade)
   user2 User @relation("User2", fields: [user2Id], references: [id], onDelete: Cascade)
   messages Message[]
-
   @@unique([user1Id, user2Id])
 }
-
 model Message {
   id             String       @id @default(cuid())
   conversationId String
   senderId       String
   content        String       @db.Text
   createdAt      DateTime     @default(now())
-
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
 }
-
 model Account {
   id                 String  @id @default(cuid())
   userId             String
@@ -138,14 +121,12 @@ model Comment {
   content   String   @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
   // Relations
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   forumId   String
   forum     Forum    @relation(fields: [forumId], references: [id], onDelete: Cascade)
   likes       CommentLike[]
-
   parentId  String?
   parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies   Comment[] @relation("CommentReplies")
@@ -181,31 +162,21 @@ model ForumTag {
   tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
   @@id([forumId, tagId])
 }
-
 model ForumLike {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
-
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   forumId   String
   forum     Forum    @relation(fields: [forumId], references: [id], onDelete: Cascade)
-
   @@unique([userId, forumId])
 }
-
 model CommentLike {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
-
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   commentId String
   comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
-
   @@unique([userId, commentId])
 }
-
-

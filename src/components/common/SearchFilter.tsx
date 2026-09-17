@@ -1,25 +1,28 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
-import { Box, TextField, InputAdornment, FormControl, Select, MenuItem, SelectChangeEvent } from "@mui/material";
+import {
+  Box,
+  TextField,
+  InputAdornment,
+  FormControl,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-
-export default function SearchFilter({ 
+export default function SearchFilter({
   placeholder = "Search forums...",
-  showSort = true 
+  showSort = true,
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  
   const initialQuery = searchParams.get("q") || "";
   const initialSort = searchParams.get("sort") || "latest";
-
   const [query, setQuery] = useState(initialQuery);
   const [sort, setSort] = useState(initialSort);
-
   useEffect(() => {
     const handler = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
@@ -28,30 +31,31 @@ export default function SearchFilter({
       } else {
         params.delete("q");
       }
-      
       if (sort !== "latest") {
         params.set("sort", sort);
       } else {
         params.delete("sort");
       }
-
       const newUrl = `${pathname}?${params.toString()}`;
       const currentUrl = `${pathname}?${searchParams.toString()}`;
-      
       if (newUrl !== currentUrl) {
         router.replace(newUrl, { scroll: false });
       }
     }, 500);
-
     return () => clearTimeout(handler);
   }, [query, sort, pathname, router, searchParams]);
-
   const handleSortChange = (event: SelectChangeEvent) => {
     setSort(event.target.value);
   };
-
   return (
-    <Box sx={{ display: 'flex', gap: 2, mb: 4, flexDirection: { xs: 'column', sm: 'row' } }}>
+    <Box
+      sx={{
+        display: "flex",
+        gap: 2,
+        mb: 4,
+        flexDirection: { xs: "column", sm: "row" },
+      }}
+    >
       <TextField
         fullWidth
         variant="outlined"
@@ -62,7 +66,7 @@ export default function SearchFilter({
           bgcolor: "background.paper",
           "& .MuiOutlinedInput-root": {
             borderRadius: 3,
-          }
+          },
         }}
         InputProps={{
           startAdornment: (
@@ -72,9 +76,10 @@ export default function SearchFilter({
           ),
         }}
       />
-      
       {showSort && (
-        <FormControl sx={{ minWidth: 200, bgcolor: 'background.paper', borderRadius: 3 }}>
+        <FormControl
+          sx={{ minWidth: 200, bgcolor: "background.paper", borderRadius: 3 }}
+        >
           <Select
             value={sort}
             onChange={handleSortChange}

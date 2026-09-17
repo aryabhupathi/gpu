@@ -3,10 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { Container, Typography } from "@mui/material";
 import ProfileClient from "./ProfileClient";
-
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
-
   if (!session?.user?.email) {
     return (
       <Container maxWidth="sm" sx={{ mt: 6 }}>
@@ -16,15 +14,12 @@ export default async function ProfilePage() {
       </Container>
     );
   }
-
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
   });
-
   if (!user) {
     return null;
   }
-
   const forums = await prisma.forum.findMany({
     where: { userId: user.id },
     include: {
@@ -34,16 +29,14 @@ export default async function ProfilePage() {
     },
     orderBy: { createdAt: "desc" },
   });
-
   const comments = await prisma.comment.findMany({
     where: { userId: user.id },
     include: {
-      forum: { select: { title: true } },
-      _count: { select: { likes: true } }
+      forum: { select: { id: true, title: true } },
+      _count: { select: { likes: true } },
     },
     orderBy: { createdAt: "desc" },
   });
-
   const likedForums = await prisma.forumLike.findMany({
     where: { userId: user.id },
     include: {
@@ -52,48 +45,42 @@ export default async function ProfilePage() {
           user: true,
           tags: { include: { tag: true } },
           _count: { select: { likes: true, comments: true } },
-        }
-      }
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
   });
-
-  // Format dates and tags for Client Component
   const formattedUser = {
     ...user,
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),
   };
-
-  const formattedForums = forums.map(f => ({ 
-    ...f, 
+  const formattedForums = forums.map((f) => ({
+    ...f,
     createdAt: f.createdAt.toISOString(),
     updatedAt: f.updatedAt.toISOString(),
-    tags: f.tags.map(t => t.tag.name) 
+    tags: f.tags.map((t) => t.tag.name),
   }));
-
-  const formattedComments = comments.map(c => ({
+  const formattedComments = comments.map((c) => ({
     ...c,
     createdAt: c.createdAt.toISOString(),
     updatedAt: c.updatedAt.toISOString(),
   }));
-
-  const formattedLikedForums = likedForums.map(l => ({ 
-    ...l, 
+  const formattedLikedForums = likedForums.map((l) => ({
+    ...l,
     createdAt: l.createdAt.toISOString(),
-    forum: { 
-      ...l.forum, 
+    forum: {
+      ...l.forum,
       createdAt: l.forum?.createdAt.toISOString(),
       updatedAt: l.forum?.updatedAt.toISOString(),
-      tags: l.forum?.tags.map(t => t.tag.name) || [] 
-    } 
+      tags: l.forum?.tags.map((t) => t.tag.name) || [],
+    },
   }));
-
   return (
-    <ProfileClient 
-      user={formattedUser} 
-      forums={formattedForums} 
-      comments={formattedComments} 
+    <ProfileClient
+      user={formattedUser}
+      forums={formattedForums}
+      comments={formattedComments}
       likedForums={formattedLikedForums}
     />
   );

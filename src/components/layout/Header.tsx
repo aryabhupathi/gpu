@@ -27,23 +27,19 @@ import NotificationBell from "./NotificationBell";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import { useAppTheme } from "@/app/ThemeProviderClient";
-
 interface SearchUser {
   id: string;
   name: string | null;
   image: string | null;
 }
-
 interface SearchForum {
   id: string;
   title: string;
 }
-
 interface SearchResults {
   forums: SearchForum[];
   users: SearchUser[];
 }
-
 export default function Header() {
   const { data: session } = useSession();
   const navigate = useRouter();
@@ -55,9 +51,7 @@ export default function Header() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const open = Boolean(anchorEl);
-
   const { mode, toggleTheme } = useAppTheme();
-
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -79,9 +73,11 @@ export default function Header() {
     navigate.push("/");
   };
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<SearchResults>({ forums: [], users: [] });
+  const [searchResults, setSearchResults] = useState<SearchResults>({
+    forums: [],
+    users: [],
+  });
   const [showDropdown, setShowDropdown] = useState(false);
-
   useEffect(() => {
     if (searchQuery.length < 2) {
       setSearchResults({ forums: [], users: [] });
@@ -99,7 +95,6 @@ export default function Header() {
     }, 300);
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery]);
-
   useEffect(() => {
     if (session?.user) {
       dispatch(
@@ -152,8 +147,6 @@ export default function Header() {
             letstalk
           </Typography>
         </Box>
-
-        {/* Search Bar */}
         <Box
           sx={{
             flexGrow: 1,
@@ -200,8 +193,6 @@ export default function Header() {
                 }}
               />
             </Box>
-
-            {/* Dropdown Results */}
             {showDropdown &&
               (searchResults.forums.length > 0 ||
                 searchResults.users.length > 0) && (
@@ -299,7 +290,6 @@ export default function Header() {
               )}
           </Box>
         </Box>
-
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <IconButton
             onClick={toggleTheme}
@@ -402,7 +392,7 @@ export default function Header() {
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
         ModalProps={{
-          keepMounted: true, // Better open performance on mobile.
+          keepMounted: true,
         }}
         sx={{
           display: { xs: "block", md: "none" },

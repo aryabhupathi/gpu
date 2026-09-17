@@ -1,45 +1,34 @@
 import { MetadataRoute } from 'next'
-import prisma from '@/lib/prisma'
-
+import prisma from "@/lib/prisma";
 export const dynamic = "force-dynamic";
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXTAUTH_URL || 'https://letstalk-community.vercel.app';
-
+  const baseUrl =
+    process.env.NEXTAUTH_URL || "https://letstalk-community.vercel.app";
   let forumUrls: MetadataRoute.Sitemap = [];
   let userUrls: MetadataRoute.Sitemap = [];
-
   try {
-    // Fetch all public forums
     const forums = await prisma.forum.findMany({
       where: { isPrivate: false },
       select: { id: true, updatedAt: true },
-    })
-
+    });
     forumUrls = forums.map((forum) => ({
       url: `${baseUrl}/forum/${forum.id}`,
       lastModified: forum.updatedAt,
-      changeFrequency: 'daily' as const,
+      changeFrequency: "daily" as const,
       priority: 0.8,
-    }))
-
-    // Fetch all users
+    }));
     const users = await prisma.user.findMany({
       select: { id: true, updatedAt: true },
-    })
-
+    });
     userUrls = users.map((user) => ({
       url: `${baseUrl}/u/${user.id}`,
       lastModified: user.updatedAt,
-      changeFrequency: 'weekly' as const,
+      changeFrequency: "weekly" as const,
       priority: 0.6,
-    }))
-  } catch (e) {
+    }));
+  } catch {
     console.error("Sitemap DB connection skipped during build");
   }
-
-
-
   return [
     {
       url: baseUrl,

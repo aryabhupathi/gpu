@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -16,21 +15,17 @@ import {
   CircularProgress,
   Link,
 } from "@mui/material";
-
 const signUpSchema = z.object({
   name: z.string().min(1, "Name is required"),
   identifier: z.string().min(1, "Please enter a valid email or mobile number"),
   password: z.string().min(1, "Password is required"),
 });
-
 type SignUpValues = z.infer<typeof signUpSchema>;
-
 export default function SignUpPage() {
   const router = useRouter();
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isPending, startTransition] = useTransition();
-
   const {
     register,
     handleSubmit,
@@ -38,7 +33,6 @@ export default function SignUpPage() {
   } = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
   });
-
   const onSubmit = (data: SignUpValues) => {
     setGeneralError(null);
     startTransition(async () => {
@@ -51,7 +45,6 @@ export default function SignUpPage() {
           },
         });
         const resData = await res.json();
-        
         if (res.ok) {
           setSuccess(true);
           setTimeout(() => {
@@ -65,7 +58,6 @@ export default function SignUpPage() {
       }
     });
   };
-
   return (
     <Container maxWidth="xs">
       <Box mt={8} component="form" onSubmit={handleSubmit(onSubmit)} noValidate>

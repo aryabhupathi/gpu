@@ -1,11 +1,9 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { Badge, IconButton, Menu, MenuItem, Typography, Box, Divider } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { getNotifications, markNotificationsAsRead } from "@/actions/notificationActions";
 import { useRouter } from "next/navigation";
-
 type Notification = {
   id: string;
   type: string;
@@ -14,19 +12,14 @@ type Notification = {
   read: boolean;
   createdAt: Date;
 };
-
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const router = useRouter();
-
   useEffect(() => {
-    // Fetch notifications on mount
     getNotifications().then(data => setNotifications(data));
   }, []);
-
   const unreadCount = notifications.filter(n => !n.read).length;
-
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
     if (unreadCount > 0) {
@@ -35,18 +28,15 @@ export default function NotificationBell() {
       });
     }
   };
-
   const handleClose = () => {
     setAnchorEl(null);
   };
-
   const handleNotificationClick = (link: string | null) => {
     handleClose();
     if (link) {
       router.push(link);
     }
   };
-
   return (
     <>
       <IconButton color="inherit" onClick={handleClick}>
@@ -54,7 +44,6 @@ export default function NotificationBell() {
           <NotificationsIcon />
         </Badge>
       </IconButton>
-      
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}

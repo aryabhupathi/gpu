@@ -4,11 +4,9 @@ import Link from "next/link";
 import ForumIcon from "@mui/icons-material/Forum";
 import GroupIcon from "@mui/icons-material/Group";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-
 export default function Home() {
   return (
     <Box>
-      {/* Hero Section */}
       <Box
         sx={{
           background: "linear-gradient(135deg, #1E293B 0%, #0F172A 100%)",
@@ -81,8 +79,6 @@ export default function Home() {
           </Box>
         </Container>
       </Box>
-
-      {/* Features Section */}
       <Container maxWidth="lg" sx={{ mb: 8 }}>
         <Typography
           variant="h4"

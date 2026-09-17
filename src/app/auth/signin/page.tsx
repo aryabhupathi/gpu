@@ -1,5 +1,4 @@
 "use client";
-
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -20,20 +19,16 @@ import {
   IconButton,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-
 const signInSchema = z.object({
   identifier: z.string().min(1, "Please enter a valid email or mobile number"),
   password: z.string().min(1, "Password is required"),
 });
-
 type SignInValues = z.infer<typeof signInSchema>;
-
 export default function SignInPage() {
   const router = useRouter();
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
-
   const {
     register,
     handleSubmit,
@@ -41,7 +36,6 @@ export default function SignInPage() {
   } = useForm<SignInValues>({
     resolver: zodResolver(signInSchema),
   });
-
   const onSubmit = (data: SignInValues) => {
     setGeneralError(null);
     startTransition(async () => {
@@ -51,7 +45,6 @@ export default function SignInPage() {
           identifier: data.identifier,
           password: data.password,
         });
-
         if (result?.error) {
           setGeneralError(result.error);
         } else if (result?.ok) {
@@ -62,7 +55,6 @@ export default function SignInPage() {
       }
     });
   };
-
   return (
     <Container maxWidth="xs">
       <Box
@@ -108,7 +100,10 @@ export default function SignInPage() {
             InputLabelProps={{ shrink: true }}
             InputProps={{
               endAdornment: (
-                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                <IconButton
+                  onClick={() => setShowPassword(!showPassword)}
+                  edge="end"
+                >
                   {showPassword ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
               ),
