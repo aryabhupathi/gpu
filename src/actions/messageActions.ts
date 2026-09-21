@@ -4,9 +4,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 export async function getConversations() {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { id: session.user.id },
   });
   if (!user) throw new Error("User not found");
   const convos = await prisma.conversation.findMany({
@@ -32,7 +32,7 @@ export async function getConversations() {
 }
 export async function getMessages(conversationId: string) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
   const messages = await prisma.message.findMany({
     where: { conversationId },
     orderBy: { createdAt: "asc" },
@@ -46,9 +46,9 @@ export async function sendMessage(
   content: string,
 ) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
   const sender = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { id: session.user.id },
   });
   if (!sender) throw new Error("User not found");
   let activeConvoId = conversationId;

@@ -5,9 +5,9 @@ import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 export async function toggleFollow(targetUserId: string) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
   const currentUser = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { id: session.user.id },
   });
   if (!currentUser) throw new Error("User not found");
   if (currentUser.id === targetUserId) {

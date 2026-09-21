@@ -74,9 +74,9 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   const session = await getServerSession(authOptions);
   let isFollowing = false;
   let isSelf = false;
-  if (session?.user?.email) {
+  if (session?.user?.id) {
     const currentUser = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { id: session.user.id },
     });
     if (currentUser) {
       if (currentUser.id === userId) {

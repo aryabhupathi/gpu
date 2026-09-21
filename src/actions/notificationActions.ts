@@ -4,9 +4,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 export async function getNotifications() {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) return [];
+  if (!session?.user?.id) return [];
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { id: session.user.id },
   });
   if (!user) return [];
   return prisma.notification.findMany({
@@ -17,9 +17,9 @@ export async function getNotifications() {
 }
 export async function markNotificationsAsRead() {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) return;
+  if (!session?.user?.id) return;
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { id: session.user.id },
   });
   if (!user) return;
   await prisma.notification.updateMany({

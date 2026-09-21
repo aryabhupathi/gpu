@@ -5,9 +5,9 @@ import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 export async function toggleBookmark(forumId: string) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { id: session.user.id },
   });
   if (!user) throw new Error("User not found");
   const existingBookmark = await prisma.bookmark.findUnique({

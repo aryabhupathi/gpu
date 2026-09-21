@@ -10,7 +10,7 @@ export default async function EditForumPage({
 }) {
   const { id } = await params;
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) {
+  if (!session?.user?.id) {
     redirect("/auth/signin");
   }
   const forum = await prisma.forum.findUnique({
@@ -21,7 +21,7 @@ export default async function EditForumPage({
     },
   });
   if (!forum) return notFound();
-  if (forum.user.email !== session.user.email) {
+  if (forum.user.id !== session.user.id) {
     redirect("/profile");
   }
   const formattedForum = {

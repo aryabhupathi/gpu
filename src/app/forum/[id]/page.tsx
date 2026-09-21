@@ -44,7 +44,7 @@ export default async function ForumDetailPage({
 }) {
   const { id } = await params;
   const session = await getServerSession(authOptions);
-  const userEmail = session?.user?.email;
+  const userId = session?.user?.id;
   const forum = await prisma.forum.findUnique({
     where: { id },
     include: {
@@ -61,9 +61,9 @@ export default async function ForumDetailPage({
   });
   if (!forum) return notFound();
   let currentUser = null;
-  if (userEmail) {
+  if (userId) {
     currentUser = await prisma.user.findUnique({
-      where: { email: userEmail },
+      where: { id: userId },
       select: { id: true, email: true, name: true, role: true },
     });
   }

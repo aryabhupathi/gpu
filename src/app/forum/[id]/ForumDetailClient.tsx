@@ -63,7 +63,7 @@ export default function ForumDetailClient({
   forum: ForumType;
   initialComments: CommentType[];
   user:
-    | { email?: string | null; name?: string | null; role?: string | null }
+    | { id: string; email?: string | null; name?: string | null; role?: string | null }
     | null
     | undefined;
 }) {
@@ -437,7 +437,7 @@ export default function ForumDetailClient({
                     <IconButton
                       onClick={handleLikeToggle}
                       disabled={
-                        forumData.user.email === user.email || isPending
+                        forumData.user.id === user.id || isPending
                       }
                       sx={{
                         bgcolor: forumData.userLiked

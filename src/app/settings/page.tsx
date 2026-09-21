@@ -38,7 +38,7 @@ if (isAdmin) {
   }));
 }
 const userInDb = await prisma.user.findUnique({
-  where: { email: session.user.email! },
+  where: { id: session.user.id },
 });
 return (
   <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>

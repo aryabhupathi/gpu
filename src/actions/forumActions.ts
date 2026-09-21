@@ -136,7 +136,7 @@ export async function updateForum(
   data: { title: string; description: string; tags: string[] },
 ) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
   await prisma.forum.update({
     where: { id: forumId },
     data: {
@@ -160,9 +160,9 @@ export async function updateForum(
 }
 export async function toggleForumLike(forumId: string) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { id: session.user.id },
   });
   if (!user) throw new Error("User not found");
   const forum = await prisma.forum.findUnique({ where: { id: forumId } });
@@ -211,9 +211,9 @@ export async function toggleForumLike(forumId: string) {
 }
 export async function deleteForum(forumId: string) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { id: session.user.id },
   });
   if (!user) throw new Error("Unauthorized");
   const existing = await prisma.forum.findUnique({
@@ -230,9 +230,9 @@ export async function deleteForum(forumId: string) {
 }
 export async function archiveForum(forumId: string) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { id: session.user.id },
   });
   if (!user || user.role !== "ADMIN") {
     throw new Error("Forbidden - Admins only");
