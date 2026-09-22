@@ -16,7 +16,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser, clearUser } from "@/redux/slices/authSlice";
 import { RootState } from "@/redux/store";

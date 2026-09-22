@@ -405,26 +405,36 @@ export default function ProfileClient({ user, forums, comments, likedForums }: P
             <Grid container spacing={2}>
               {user.followers.map((f) => (
                 <Grid size={{ xs: 12, sm: 6, md: 4 }} key={f.follower.id}>
-                  <Link href={`/u/${f.follower.id}`} style={{ textDecoration: 'none' }}>
+                  <Link
+                    href={`/u/${f.follower.id}`}
+                    style={{ textDecoration: "none" }}
+                  >
                     <Paper
                       elevation={0}
                       sx={{
                         p: 2,
-                        display: 'flex',
-                        alignItems: 'center',
+                        display: "flex",
+                        alignItems: "center",
                         gap: 2,
                         borderRadius: 3,
-                        border: '1px solid #E5E7EB',
-                        '&:hover': {
-                          borderColor: '#7C3AED',
-                          bgcolor: 'rgba(124, 58, 237, 0.02)',
-                        }
+                        border: "1px solid #E5E7EB",
+                        "&:hover": {
+                          borderColor: "#7C3AED",
+                          bgcolor: "rgba(124, 58, 237, 0.02)",
+                        },
                       }}
                     >
-                      <Avatar src={f.follower.image || ""} sx={{ width: 48, height: 48 }}>
-                        {f.follower.name?.charAt(0) || 'U'}
+                      <Avatar
+                        src={f.follower.image || ""}
+                        sx={{ width: 48, height: 48 }}
+                      >
+                        {f.follower.name?.charAt(0) || "U"}
                       </Avatar>
-                      <Typography variant="subtitle1" fontWeight={600} color="text.primary">
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight={600}
+                        color="text.primary"
+                      >
                         {f.follower.name || "Unknown"}
                       </Typography>
                     </Paper>
@@ -433,9 +443,18 @@ export default function ProfileClient({ user, forums, comments, likedForums }: P
               ))}
             </Grid>
           ) : (
-            <Paper elevation={0} sx={{ p: 6, textAlign: "center", borderRadius: 4, bgcolor: "#F8FAFC", border: "1px dashed #CBD5E1" }}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 6,
+                textAlign: "center",
+                borderRadius: 4,
+                bgcolor: "#F8FAFC",
+                border: "1px dashed #CBD5E1",
+              }}
+            >
               <Typography variant="body1" color="text.secondary">
-                You don't have any followers yet.
+                You don&apos;t have any followers yet.
               </Typography>
             </Paper>
           )}
@@ -447,26 +466,36 @@ export default function ProfileClient({ user, forums, comments, likedForums }: P
             <Grid container spacing={2}>
               {user.following.map((f) => (
                 <Grid size={{ xs: 12, sm: 6, md: 4 }} key={f.following.id}>
-                  <Link href={`/u/${f.following.id}`} style={{ textDecoration: 'none' }}>
+                  <Link
+                    href={`/u/${f.following.id}`}
+                    style={{ textDecoration: "none" }}
+                  >
                     <Paper
                       elevation={0}
                       sx={{
                         p: 2,
-                        display: 'flex',
-                        alignItems: 'center',
+                        display: "flex",
+                        alignItems: "center",
                         gap: 2,
                         borderRadius: 3,
-                        border: '1px solid #E5E7EB',
-                        '&:hover': {
-                          borderColor: '#7C3AED',
-                          bgcolor: 'rgba(124, 58, 237, 0.02)',
-                        }
+                        border: "1px solid #E5E7EB",
+                        "&:hover": {
+                          borderColor: "#7C3AED",
+                          bgcolor: "rgba(124, 58, 237, 0.02)",
+                        },
                       }}
                     >
-                      <Avatar src={f.following.image || ""} sx={{ width: 48, height: 48 }}>
-                        {f.following.name?.charAt(0) || 'U'}
+                      <Avatar
+                        src={f.following.image || ""}
+                        sx={{ width: 48, height: 48 }}
+                      >
+                        {f.following.name?.charAt(0) || "U"}
                       </Avatar>
-                      <Typography variant="subtitle1" fontWeight={600} color="text.primary">
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight={600}
+                        color="text.primary"
+                      >
                         {f.following.name || "Unknown"}
                       </Typography>
                     </Paper>
@@ -475,9 +504,18 @@ export default function ProfileClient({ user, forums, comments, likedForums }: P
               ))}
             </Grid>
           ) : (
-            <Paper elevation={0} sx={{ p: 6, textAlign: "center", borderRadius: 4, bgcolor: "#F8FAFC", border: "1px dashed #CBD5E1" }}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 6,
+                textAlign: "center",
+                borderRadius: 4,
+                bgcolor: "#F8FAFC",
+                border: "1px dashed #CBD5E1",
+              }}
+            >
               <Typography variant="body1" color="text.secondary">
-                You aren't following anyone yet.
+                You aren&apos;t following anyone yet.
               </Typography>
             </Paper>
           )}
