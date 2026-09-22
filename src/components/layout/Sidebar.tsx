@@ -70,6 +70,7 @@ export default function Sidebar({ sx }: SidebarProps) {
         "&::-webkit-scrollbar": { display: "none" },
         msOverflowStyle: "none",
         scrollbarWidth: "none",
+        pt: { xs: 0, md: 4 },
         pb: 2,
         ...sx,
       }}

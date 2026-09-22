@@ -84,5 +84,16 @@ export async function sendMessage(
     where: { id: activeConvoId! },
     data: { updatedAt: new Date() },
   });
+
+  // Create a notification for the recipient
+  await prisma.notification.create({
+    data: {
+      userId: recipientId,
+      type: "MESSAGE",
+      message: `${sender.name || "Someone"} sent you a new message.`,
+      link: "/messages",
+    },
+  });
+
   return message;
 }

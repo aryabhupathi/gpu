@@ -1,0 +1,146 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: forum.spec.ts >> Forum E2E >> User can log in and create a new forum topic
+- Location: e2e\forum.spec.ts:7:7
+
+# Error details
+
+```
+Test timeout of 30000ms exceeded.
+```
+
+```
+Error: page.fill: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for locator('input[name="identifier"]')
+    - locator resolved to <input required="" type="text" name="identifier" aria-invalid="false" id="_R_rl5esnebn6lalb_" class="MuiInputBase-input MuiOutlinedInput-input mui-16wblaj-MuiInputBase-input-MuiOutlinedInput-input"/>
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img "logo" [ref=e7]
+          - heading "letstalk" [level=6] [ref=e8]
+        - textbox "Search posts, users..." [ref=e14]
+        - generic [ref=e15]:
+          - button [ref=e16] [cursor=pointer]
+          - button [ref=e19] [cursor=pointer]:
+            - img "User" [ref=e21]
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "Home" [ref=e26] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=e32]:
+            - link "Explore" [ref=e33] [cursor=pointer]:
+              - /url: /explore
+          - listitem [ref=e39]:
+            - link "Messages" [ref=e40] [cursor=pointer]:
+              - /url: /messages
+        - separator [ref=e46]
+        - generic [ref=e47]: YOUR SPACES
+        - list [ref=e48]:
+          - listitem [ref=e49]:
+            - link "Tech Hub" [ref=e50] [cursor=pointer]:
+              - /url: /forum?q=Tech
+          - listitem [ref=e56]:
+            - link "Movies & Art" [ref=e57] [cursor=pointer]:
+              - /url: /forum?q=Movies
+          - listitem [ref=e63]:
+            - link "Sports & Games" [ref=e64] [cursor=pointer]:
+              - /url: /forum?q=Cricket
+      - generic [ref=e70]:
+        - main [ref=e71]:
+          - generic [ref=e73]:
+            - heading "Sign In" [level=5] [ref=e74]
+            - generic [ref=e75]:
+              - generic [ref=e76]:
+                - generic [ref=e77]:
+                  - text: Email or Mobile Number
+                  - generic [aria-hidden] [ref=e78]: "*"
+                - generic [ref=e79]:
+                  - textbox "Email or Mobile Number" [ref=e80]
+                  - group [aria-hidden]:
+                    - generic: Email or Mobile Number *
+              - generic [ref=e81]:
+                - generic [ref=e82]:
+                  - text: Password
+                  - generic [aria-hidden] [ref=e83]: "*"
+                - generic [ref=e84]:
+                  - textbox "Password" [ref=e85]
+                  - button [ref=e86] [cursor=pointer]
+                  - group [aria-hidden]:
+                    - generic: Password *
+              - button "Sign In" [ref=e89] [cursor=pointer]
+              - separator [ref=e90]:
+                - generic [ref=e91]: or
+              - paragraph [ref=e93]:
+                - text: Don't have an account?
+                - link "Sign Up" [ref=e94] [cursor=pointer]:
+                  - /url: /auth/signup
+        - paragraph [ref=e96]: © 2026 letstalk. All rights reserved.
+  - button "Open Next.js Dev Tools" [ref=e102] [cursor=pointer]
+  - alert [ref=e106]
+```
+
+# Test source
+
+```ts
+  1  | import { test, expect } from '@playwright/test';
+  2  | 
+  3  | test.describe('Forum E2E', () => {
+  4  |   // Use a unique title to avoid collisions
+  5  |   const uniqueTitle = `Automated E2E Topic ${Date.now()}`;
+  6  | 
+  7  |   test('User can log in and create a new forum topic', async ({ page }) => {
+  8  |     // 1. Go to sign-in page
+  9  |     await page.goto('/auth/signin');
+  10 | 
+  11 |     // 2. Log in using the dummy account provisioned in auth.ts
+> 12 |     await page.fill('input[name="identifier"]', 'dummy@example.com');
+     |                ^ Error: page.fill: Test timeout of 30000ms exceeded.
+  13 |     await page.fill('input[name="password"]', 'password123');
+  14 |     await page.click('button:has-text("Sign In")');
+  15 | 
+  16 |     // 3. Wait for redirect to home
+  17 |     await expect(page).toHaveURL('/');
+  18 |     
+  19 |     // 4. Click the "+ New Topic" button in the Sidebar
+  20 |     await page.click('text="+ New Topic"');
+  21 |     await expect(page).toHaveURL('/forum/create');
+  22 | 
+  23 |     // 5. Fill out the forum creation form
+  24 |     await page.fill('input[placeholder="What do you want to talk about?"]', uniqueTitle);
+  25 |     
+  26 |     // The description uses Tiptap rich text editor which might be contenteditable
+  27 |     await page.locator('.ProseMirror').fill('This is a test description generated by Playwright E2E automation.');
+  28 |     
+  29 |     // Add a tag
+  30 |     await page.fill('input[placeholder="e.g. React, Next.js, Help"]', 'E2ETesting');
+  31 | 
+  32 |     // 6. Submit the form
+  33 |     await page.click('button:has-text("Post Discussion")');
+  34 | 
+  35 |     // 7. Verify we are redirected to the home page or forum page and the topic is visible
+  36 |     await expect(page).toHaveURL(new RegExp('/forum/.*|/'));
+  37 |     
+  38 |     // Verify the title appears on the page
+  39 |     await expect(page.locator(`text="${uniqueTitle}"`).first()).toBeVisible({ timeout: 10000 });
+  40 |   });
+  41 | });
+  42 | 
+```

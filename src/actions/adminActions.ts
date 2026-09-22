@@ -23,6 +23,15 @@ export async function warnUser(userId: string) {
     where: { id: userId },
     data: { warnings: { increment: 1 } },
   });
+  
+  await prisma.notification.create({
+    data: {
+      userId: userId,
+      type: "WARNING",
+      message: "You have received an official warning from an administrator regarding your recent activity.",
+    },
+  });
+
   revalidatePath("/settings");
 }
 export async function adminDeleteComment(commentId: string) {
